@@ -1,0 +1,13 @@
+interface:
+  display_name: "跑步教练"
+  short_description: "分析高驰数据、恢复风险和训练计划"
+  default_prompt: "使用 $running-coach 分析我近期的高驰跑步数据、恢复状态和训练风险，并给出今天的训练建议。"
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "coros"
+      description: "用于获取高驰健康、恢复、体能和运动活动数据的 COROS MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.coros.com/mcp"
+policy:
+  allow_implicit_invocation: true

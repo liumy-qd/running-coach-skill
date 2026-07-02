@@ -1,0 +1,33 @@
+{
+  "labelId": "synthetic-lap-example",
+  "sportType": 100,
+  "lapGroups": [
+    {
+      "type": 2,
+      "laps": [
+        {"lapIndex": 1, "distance": 100000, "time": 300, "avgHr": 140, "maxHr": 148, "avgCadence": 174, "avgPower": 245},
+        {"lapIndex": 2, "distance": 100000, "time": 300, "avgHr": 145, "maxHr": 151, "avgCadence": 175, "avgPower": 248},
+        {"lapIndex": 3, "distance": 100000, "time": 260, "avgHr": 160, "maxHr": 171, "avgCadence": 184, "avgPower": 310},
+        {"lapIndex": 4, "distance": 100000, "time": 330, "avgHr": 146, "maxHr": 153, "avgCadence": 173, "avgPower": 240},
+        {"lapIndex": 5, "distance": 100000, "time": 262, "avgHr": 164, "maxHr": 174, "avgCadence": 185, "avgPower": 312},
+        {"lapIndex": 6, "distance": 100000, "time": 335, "avgHr": 148, "maxHr": 155, "avgCadence": 172, "avgPower": 238},
+        {"lapIndex": 7, "distance": 100000, "time": 270, "avgHr": 168, "maxHr": 178, "avgCadence": 183, "avgPower": 306},
+        {"lapIndex": 8, "distance": 100000, "time": 345, "avgHr": 152, "maxHr": 160, "avgCadence": 171, "avgPower": 235}
+      ]
+    },
+    {
+      "type": 11,
+      "laps": [
+        {"lapIndex": 1, "distance": 400000, "time": 1190, "avgHr": 148},
+        {"lapIndex": 2, "distance": 400000, "time": 1212, "avgHr": 158}
+      ]
+    },
+    {
+      "type": -1,
+      "laps": [
+        {"lapIndex": 1, "distance": 800000, "time": 2402, "avgHr": 153}
+      ]
+    }
+  ]
+}
+

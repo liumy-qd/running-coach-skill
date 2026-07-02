@@ -1,0 +1,35 @@
+VO2max: 52.3
+Running Level: 71.5
+Threshold Pace: 4:45 /km
+5 km Prediction: 20:30
+10 km Prediction: 42:30
+Half Marathon Prediction: 1:35:00
+Marathon Prediction: 3:25:00
+
+Recovery: 48%
+Level: Tired
+Estimated Full Recovery: 18h
+
+2026-07-01
+Comment: High
+Short-Term Load: 680
+Long-Term Load: 460
+Load Ratio: 1.48
+
+1. Outdoor Run - 2026-06-29
+Location: Synthetic City
+Distance: 22.4 km
+Duration: 1:58:00 | Average Pace: 5:16 /km | Avg HR: 151 bpm
+LabelId: 1001
+SportType: 100
+startTimestamp=1782700000
+endTimestamp=1782707080
+
+2. Outdoor Run - 2026-07-01
+Location: Synthetic City
+Distance: 8.0 km
+Duration: 0:38:00 | Average Pace: 4:45 /km | Avg HR: 166 bpm
+LabelId: 1002
+SportType: 100
+startTimestamp=1782870000
+endTimestamp=1782872280
