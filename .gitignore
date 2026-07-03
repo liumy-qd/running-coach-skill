@@ -1,5 +1,6 @@
 .DS_Store
 __pycache__/
+.pycache*/
 *.pyc
 .pytest_cache/
 .env
@@ -13,4 +14,3 @@ token*
 *token*.json
 *secret*
 *password*
-

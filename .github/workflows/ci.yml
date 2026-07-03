@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile scripts
+        run: PYTHONPYCACHEPREFIX=/tmp/running-coach-pycache python3 -m py_compile scripts/*.py
+
+      - name: Run synthetic examples
+        run: |
+          python3 scripts/analyze_laps.py --input examples/laps.json --json
+          python3 scripts/build_coros_summary.py --input examples/coros-summary.txt
+          python3 scripts/evaluate_context.py --input examples/context-summary.json --markdown
+
+      - name: Validate skill metadata
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path("SKILL.md").read_text(encoding="utf-8")
+          if not text.startswith("---\n"):
+              raise SystemExit("SKILL.md must start with YAML frontmatter")
+          frontmatter = text.split("---", 2)[1]
+          required = {"name:", "description:"}
+          missing = [item for item in required if item not in frontmatter]
+          if missing:
+              raise SystemExit(f"Missing frontmatter fields: {missing}")
+          if "name: running-coach" not in frontmatter:
+              raise SystemExit("Skill name must be running-coach")
+          for path in [
+              "agents/openai.yaml",
+              "references/coros-tools.md",
+              "scripts/analyze_laps.py",
+              "scripts/build_coros_summary.py",
+              "scripts/evaluate_context.py",
+          ]:
+              if not Path(path).exists():
+                  raise SystemExit(f"Missing required file: {path}")
+          PY
+
+      - name: Check for generated junk
+        run: |
+          test -z "$(find . -name '.DS_Store' -o -name '__pycache__' -o -name '*.pyc')"

@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a problem with the skill, scripts, or examples.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please use synthetic or redacted data only.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the unexpected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or prompt
+      description: Paste the command or prompt that triggered the issue.
+      render: shell
+  - type: textarea
+    id: sample-data
+    attributes:
+      label: Minimal synthetic or redacted sample
+      description: Do not include real COROS tokens, OAuth callback URLs, passwords, or private health exports.
+      render: json
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "Python 3.11"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      render: text
+

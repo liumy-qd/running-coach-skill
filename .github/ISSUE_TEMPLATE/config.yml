@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security and private data
+    url: https://github.com/liumy-qd/running-coach-skill/blob/main/PRIVACY.md
+    about: Please do not post private health exports, tokens, OAuth callback URLs, or passwords.
+
