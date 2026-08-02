@@ -5,7 +5,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/liumy-qd/running-coach-skill?include_prereleases&label=release)](https://github.com/liumy-qd/running-coach-skill/releases)
 [![GitHub stars](https://img.shields.io/github/stars/liumy-qd/running-coach-skill?style=social)](https://github.com/liumy-qd/running-coach-skill/stargazers)
 
-An OpenAI Codex skill for COROS runners: daily readiness, HRV/sleep recovery, training load, lap analysis, fueling, weather risk, injury risk, and race plans from 5K to marathon.
+An OpenAI Codex skill for COROS runners: daily readiness, sleep HRV recovery, training load, lap/FIT analysis, structured athlete context, validated training prescriptions, fueling, weather risk, injury risk, and race plans from 5K to marathon.
 
 中文快速入口：这是一个面向高驰 COROS 跑者的 Codex skill，用于分析恢复、训练负荷、圈速分段、补给、天气热应激、伤病风险，并生成 5K/10K/半马/全马训练建议。
 
@@ -23,6 +23,7 @@ Most running dashboards show data. This skill turns COROS data into an agent-fri
 - Analyze laps, segments, intervals, marathon-pace blocks, long-run drift, and late-run fade.
 - Adjust for heat, humidity, wind, rain, fueling, fatigue, pain, and injury risk.
 - Produce a plan-execute-review loop with stop rules and feedback questions.
+- Build an `AthleteContext` and validate `TrainingPrescription` outputs before presenting training advice.
 
 ## Quick Start
 
@@ -40,6 +41,8 @@ cd ~/.codex/skills/running-coach
 python3 scripts/analyze_laps.py --input examples/laps.json --json
 python3 scripts/build_coros_summary.py --input examples/coros-summary.txt
 python3 scripts/evaluate_context.py --input examples/context-summary.json --markdown
+python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json > /tmp/athlete-context.json
+python3 scripts/validate_prescription.py --input examples/prescription-safe.json --context /tmp/athlete-context.json
 ```
 
 Use it in Codex:
@@ -97,16 +100,17 @@ More examples:
 | Environment | Adjusts recommendations for heat, humidity, dew point, wind, rain, and time of day. |
 | Fueling | Adds carb, hydration, electrolyte, and GI feedback checks for long runs and races. |
 | Safety | Includes stop rules, downshift options, and injury-risk prompts. |
+| V2 schemas | Produces compact AthleteContext and validates TrainingPrescription safety gates. |
 
 ## How It Works
 
 1. Classify the request: daily check, weekly review, activity review, race plan, or data inventory.
 2. Pull the minimum required COROS data.
-3. Score data coverage and confidence.
-4. Build personal baselines.
-5. Gate training intensity with readiness.
-6. Deep-dive key activities when needed.
-7. Adjust for environment, fueling, fatigue, and injury risk.
+3. Build a compact AthleteContext with coverage, baselines, risk flags, and evidence.
+4. Gate training intensity deterministically before the model explains the plan.
+5. Deep-dive key activities when needed.
+6. Adjust for environment, fueling, fatigue, and injury risk.
+7. Validate the TrainingPrescription safety contract.
 8. Return a concrete action plan plus stop rules and feedback questions.
 
 ## Repository Layout
@@ -136,6 +140,9 @@ python3 -m py_compile scripts/*.py
 python3 scripts/analyze_laps.py --input examples/laps.json --json
 python3 scripts/build_coros_summary.py --input examples/coros-summary.txt
 python3 scripts/evaluate_context.py --input examples/context-summary.json --markdown
+python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json > /tmp/athlete-context.json
+python3 scripts/validate_prescription.py --input examples/prescription-safe.json --context /tmp/athlete-context.json
+python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
 If you have Codex's `skill-creator` validation script available:
@@ -147,7 +154,7 @@ python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .
 ## Roadmap
 
 - Add more synthetic examples for 5K, 10K, half marathon, marathon, recovery week, and heat-stress scenarios.
-- Add optional structured output schemas for readiness and activity review.
+- Add more optional parser adapters for direct MCP JSON bundles from different clients.
 - Add more route/weather/fueling examples without storing private user data.
 - Add community-contributed coaching templates for different experience levels.
 
@@ -191,4 +198,3 @@ git clone https://github.com/liumy-qd/running-coach-skill ~/.codex/skills/runnin
 ## License
 
 MIT
-

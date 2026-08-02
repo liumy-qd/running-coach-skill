@@ -1,0 +1,15 @@
+{
+  "as_of": "2026-08-01T08:00:00+08:00",
+  "timezone": "Asia/Shanghai",
+  "request_type": "daily-check",
+  "windows": {"health_days": 7, "activity_days": 14},
+  "daily_health": [{"date": "2026-07-31", "sleep_hours": 7.2}],
+  "sleep": [{"date": "2026-07-31", "sleep_hours": 7.2}, {"date": "2026-07-30", "sleep_hours": 6.8}, {"date": "2026-07-29", "sleep_hours": 7.0}],
+  "sleep_hrv": [{"date": "2026-07-31", "average_hrv": 48}, {"date": "2026-07-30", "average_hrv": 51}, {"date": "2026-07-29", "average_hrv": 49}],
+  "resting_hr": [{"date": "2026-07-31", "resting_hr": 53}, {"date": "2026-07-30", "resting_hr": 54}, {"date": "2026-07-29", "resting_hr": 53}],
+  "stress": [{"date": "2026-07-31", "stress": 28}, {"date": "2026-07-30", "stress": 31}, {"date": "2026-07-29", "stress": 29}],
+  "recovery": {"recovery_percent": 78, "level": "Good"},
+  "training_load": [{"date": "2026-07-31", "load_ratio": 1.05}, {"date": "2026-07-30", "load_ratio": 1.0}, {"date": "2026-07-29", "load_ratio": 0.96}],
+  "activities": [{"date": "2026-07-30", "distance_km": 8.0, "sport_type": 100}, {"date": "2026-07-28", "distance_km": 10.0, "sport_type": 100}],
+  "fitness": {"threshold_pace": "4:45"}
+}

@@ -267,7 +267,7 @@ def build_risk(summary: dict[str, Any]) -> dict[str, Any]:
 
 
 def build_summary(text: str) -> dict[str, Any]:
-    summary: dict[str, Any] = {}
+    summary: dict[str, Any] = {"schema_version": "1.1", "v2_compatible": True}
     fitness = parse_fitness(text)
     recovery = parse_recovery(text)
     loads = parse_training_load(text)

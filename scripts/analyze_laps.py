@@ -278,6 +278,7 @@ def build_analysis(data: dict[str, Any]) -> dict[str, Any]:
     one_km_stability = segment_stability(one_km_group)
     five_km_stability = segment_stability(five_km_group)
     return {
+        "schema_version": "2.0",
         "activity": {"labelId": data.get("labelId"), "sportType": data.get("sportType")},
         "summary": lap_summary,
         "total_summary": total_summary,

@@ -17,5 +17,7 @@ python3 -m py_compile scripts/*.py
 python3 scripts/analyze_laps.py --input examples/laps.json --json
 python3 scripts/build_coros_summary.py --input examples/coros-summary.txt
 python3 scripts/evaluate_context.py --input examples/context-summary.json --markdown
+python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json > /tmp/athlete-context.json
+python3 scripts/validate_prescription.py --input examples/prescription-safe.json --context /tmp/athlete-context.json
+python3 -m unittest discover -s tests -p 'test_*.py'
 ```
-

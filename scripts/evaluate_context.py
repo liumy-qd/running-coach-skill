@@ -21,6 +21,17 @@ def risk_rank(severity: str) -> int:
 
 
 def choose_readiness(summary: dict[str, Any]) -> dict[str, Any]:
+    if summary.get("schema_version") == "2.0" and isinstance(summary.get("readiness"), dict):
+        readiness = summary["readiness"]
+        flags = list(summary.get("risk_flags") or [])
+        level = readiness.get("level", "yellow")
+        action = readiness.get("action", "downshift")
+        training = (
+            "取消高强度，优先休息、快走或恢复活动。" if level == "red"
+            else "保留出门习惯，但降低强度和总量；避免间歇、阈值和长距离。" if level == "yellow"
+            else "可按计划执行；仍需满足训练史、环境和体感约束。"
+        )
+        return {"level": level, "action": action, "training_guidance": training, "reasons": [flag.get("detail") for flag in flags if flag.get("detail")], "flags": flags}
     coverage = summary.get("coverage") or {}
     risk = summary.get("risk") or {}
     recovery = summary.get("recovery") or {}
@@ -77,7 +88,7 @@ def build_evaluation(summary: dict[str, Any]) -> dict[str, Any]:
         "coverage": coverage,
         "baseline": baseline,
         "readiness": readiness,
-        "risk": summary.get("risk") or {},
+        "risk": summary.get("risk") or {"flags": summary.get("risk_flags") or []},
         "next_action": {
             "primary": readiness["training_guidance"],
             "stop_rule": "若疼痛影响步态、心率异常飙升、头晕胸痛、热湿不适或连续两段无法完成目标，立即停止质量课并改为回家恢复。",

@@ -9,10 +9,10 @@
 ```bash
 coros-mcp list-tools --refresh
 coros-mcp call-tool --tool queryRecoveryStatus --arguments-json '{}'
-coros-mcp call-tool --tool queryDailyHealthData --arguments-json '{"days":7,"timezone":"Asia/Shanghai"}'
+coros-mcp call-tool --tool queryDailyHealthData --arguments-json '{"days":7}'
 ```
 
-复杂参数也放在 `--arguments-json` 中，字段名保持英文。不要输出或记录 token。若 CLI 返回 `invalid_grant`、`run login first` 或授权过期，提示需要重新登录，并优先切回原生 MCP；不要把 access token、OAuth state 或回调参数写入报告。
+复杂参数也放在 `--arguments-json` 中，字段名保持英文。不要输出或记录 token、OAuth state、poll token、授权链接或回调参数。若 CLI 返回授权错误，读取 `references/coros-auth.md` 并使用授权脚本。
 
 ## 用户资料与设备
 
@@ -21,19 +21,21 @@ coros-mcp call-tool --tool queryDailyHealthData --arguments-json '{"days":7,"tim
 
 ## 日常健康
 
-- `queryDailyHealthData(days, timezone)`：每日步数、热量、运动分钟、平均压力和睡眠摘要。
-- `querySleepData(days, startDate, endDate, timezone)`：睡眠分数、主睡眠时长、睡眠窗口、深睡/浅睡/REM/清醒比例、清醒时长与次数、小睡。
-- `queryAvgHeartRate(days, timezone)`：每日平均、最低、最高心率。
-- `queryRestingHeartRate(days, timezone)`：每日静息心率。
-- `queryHrvAssessment(days, timezone)`：HRV 平均值、基线、正常范围和评估。
-- `queryStressLevel(days, timezone)`：每日平均压力和可用的压力分类。
+- `queryDailyHealthData(days)`：每日步数、热量、运动分钟、平均压力和睡眠摘要。
+- `querySleepData(startDate, endDate, days)`：睡眠分数、主睡眠时长、睡眠窗口、深睡/浅睡/REM/清醒比例、清醒时长与次数、小睡。睡眠按醒来日期归属。
+- `queryAvgHeartRate(startDate, endDate, days)`：每日平均心率。
+- `queryRestingHeartRate(days)`：每日静息心率。
+- `querySleepHrv(startDate, endDate, days)`：官方睡眠 HRV 评估、基线、正常范围和原始点；不要自己从原始点重算官方日均值。
+- `queryStressLevel(days)`：每日平均压力。
+- `queryHealthCheckTimeSeries(startDate, endDate, days)`：健康检测的心率、HRV、压力、呼吸率和 SpO2 时序。
+- `queryStressTimeSeries(startDate, endDate, days)`：压力、压力 HRV 和压力心率原始时序。
 
 ## 恢复与体能
 
 - `queryRecoveryStatus()`：当前恢复百分比、恢复等级、预计完全恢复时间。
 - `queryFitnessAssessmentOverview()`：VO2max、跑力、阈值配速、比赛预测。
 - `queryTrainingLoadAssessment(days)`：短期负荷、长期负荷、负荷比和评价。
-- `queryTrainingSchedule(startDate, endDate, timezone)`：日期范围内的计划训练。
+- `queryTrainingSchedule(startDate, endDate)`：日期范围内的计划训练。内部 Plan ID 只用于后续工具调用，不展示给用户。
 
 ## 运动记录
 
@@ -42,7 +44,7 @@ coros-mcp call-tool --tool queryDailyHealthData --arguments-json '{"days":7,"tim
 - `startDate`、`endDate`：`yyyyMMdd`。
 - `limit`：日常检查用 20，周复盘用 50，长期趋势用 100。
 - `sportTypeCodes`：跑步用 `[100,101,102,103]`，所有运动用 `[65535]`。
-- `timezone`：通常使用 `Asia/Shanghai`。
+- 日期使用用户 COROS 时区；工具不接受 `timezone` 字段，报告中注明实际时区。
 - 如果工具 schema 要求可选过滤字段，未使用的文本字段填空字符串，未使用的数字范围填 `0`。
 
 跑步运动类型：

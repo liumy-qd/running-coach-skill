@@ -1,7 +1,7 @@
 interface:
   display_name: "跑步教练"
-  short_description: "分析高驰数据、恢复风险和训练计划"
-  default_prompt: "使用 $running-coach 分析我近期的高驰跑步数据、恢复状态和训练风险，并给出今天的训练建议。"
+  short_description: "用高驰数据生成可校验的恢复判断与训练处方"
+  default_prompt: "使用 $running-coach 分析我的高驰恢复与训练数据，先做安全门控，再给出今天可直接执行的训练处方。"
 dependencies:
   tools:
     - type: "mcp"

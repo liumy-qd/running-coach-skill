@@ -1,0 +1,16 @@
+{
+  "schema_version": "2.0",
+  "decision": "downshift",
+  "readiness": "yellow",
+  "confidence": 0.78,
+  "evidence_window": {"start": "2026-07-25", "end": "2026-08-01"},
+  "observations": ["负荷比偏高"],
+  "inferences": ["今天不适合质量课"],
+  "session": {"type": "easy_run", "purpose": "保持训练习惯", "duration_min": 30, "intensity": "easy", "rpe_low": 2, "rpe_high": 4},
+  "stop_rules": ["疼痛影响步态或出现头晕时停止"],
+  "downshift_option": "改为快走或完全休息",
+  "missing_data": [],
+  "feedback_questions": ["完成时长和 RPE？"],
+  "next_checkpoint": "明早复查睡眠和 HRV",
+  "evidence": []
+}

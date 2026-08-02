@@ -19,11 +19,17 @@ jobs:
       - name: Compile scripts
         run: PYTHONPYCACHEPREFIX=/tmp/running-coach-pycache python3 -m py_compile scripts/*.py
 
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+
       - name: Run synthetic examples
         run: |
           python3 scripts/analyze_laps.py --input examples/laps.json --json
           python3 scripts/build_coros_summary.py --input examples/coros-summary.txt
           python3 scripts/evaluate_context.py --input examples/context-summary.json --markdown
+          python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json > /tmp/athlete-context.json
+          python3 scripts/evaluate_context.py --input /tmp/athlete-context.json --markdown
+          python3 scripts/validate_prescription.py --input examples/prescription-safe.json --context /tmp/athlete-context.json
 
       - name: Validate skill metadata
         run: |
@@ -45,6 +51,10 @@ jobs:
               "scripts/analyze_laps.py",
               "scripts/build_coros_summary.py",
               "scripts/evaluate_context.py",
+              "scripts/build_athlete_context.py",
+              "scripts/validate_prescription.py",
+              "scripts/coros_auth_bootstrap.py",
+              "references/v2-schemas.md",
           ]:
               if not Path(path).exists():
                   raise SystemExit(f"Missing required file: {path}")
@@ -53,3 +63,7 @@ jobs:
       - name: Check for generated junk
         run: |
           test -z "$(find . -name '.DS_Store' -o -name '__pycache__' -o -name '*.pyc')"
+
+      - name: Check for sensitive files
+        run: |
+          test -z "$(find . -type f \( -iname '*.fit' -o -iname '*.gpx' -o -iname '*.tcx' -o -iname '*token*' -o -iname '*secret*' -o -iname '*password*' \) -not -path './.git/*')"
