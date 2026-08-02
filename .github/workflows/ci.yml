@@ -7,6 +7,8 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPYCACHEPREFIX: /tmp/running-coach-pycache
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
