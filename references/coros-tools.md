@@ -80,11 +80,12 @@ coros-mcp call-tool --tool queryDailyHealthData --arguments-json '{"days":7}'
 - 长距离：调用 `queryActivityLapData(labelId, sportType)`，分析 5 km、10 km、后半程和最后 20-30 分钟的配速、心率、步频、功率变化。
 - 马拉松配速课：调用 `queryActivityLapData()`；若用户指定“最后 N 分钟”“第 X 段马配”或活动有明确时间窗，调用 `queryCustomActivityLapData(labelId, sportType, startTimestamp, endTimestamp)`。
 - 间歇课：调用 `queryActivityLapData()`，识别快速段、恢复段、重复次数、最快/最慢差异、心率恢复和末段衰减。
-- 比赛或关键训练：若 MCP 客户端支持二进制资源，可调用 `downloadActivityFitFiles()`；否则使用 `queryActivityFitFileDownloadUrls()` 作为 FIT 文件兜底，但不要在不需要时消耗每日下载额度。
+- 比赛深度复盘（`race-review`）：调用 `queryActivityFitFileDownloadUrls(labelId, sportType)` 获取 FIT 下载地址，按 `references/fit-deep-review.md` 的临时目录流程下载、用 `scripts/analyze_fit.py` 解析、解析后立即删除。下载地址是短期签名凭证，不要回显。
+- 其他场景不要消耗 FIT 每日下载额度。
 
 从 `querySportRecords` 获取 `labelId`、`sportType`、`startTimestamp`、`endTimestamp` 后，再调用圈速和自定义分段工具。若用户只问普通日常建议，不要过度抓取 FIT。
 
-圈速 JSON 可交给 `scripts/analyze_laps.py` 生成紧凑摘要；MCP 文本结果可交给 `scripts/build_coros_summary.py` 归一化。
+圈速 JSON 可交给 `scripts/analyze_laps.py` 生成紧凑摘要；MCP 文本结果可交给 `scripts/build_coros_summary.py` 归一化（V1 过渡方案，结构化 bundle 优先用 `scripts/build_athlete_context.py`）。
 
 ## 常用查询窗口
 

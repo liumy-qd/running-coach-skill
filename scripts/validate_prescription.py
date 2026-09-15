@@ -11,6 +11,9 @@ from typing import Any
 
 QUALITY_TYPES = {"workout", "interval", "threshold", "tempo", "race_pace", "race"}
 LONG_TYPES = {"long_run", "long"}
+HARD_INTENSITIES = {"threshold", "interval", "hard", "tempo", "race", "race_pace", "high"}
+DECISIONS = {"as_planned", "downshift", "rest_or_recovery", "ask"}
+RECOVERY_SESSIONS = {"rest", "rest_or_recovery", "walk", "recovery"}
 
 
 def conservative(reason: str, readiness: str = "red") -> dict[str, Any]:
@@ -36,17 +39,27 @@ def validate(prescription: dict[str, Any], context: dict[str, Any] | None = None
     decision = str(prescription.get("decision") or "ask")
     session = prescription.get("session") if isinstance(prescription.get("session"), dict) else {}
     session_type = str(session.get("type") or "")
-    required = ["decision", "readiness", "confidence", "session", "stop_rules", "downshift_option", "feedback_questions", "next_checkpoint"]
+    required = [
+        "decision", "readiness", "confidence", "session", "evidence_window",
+        "stop_rules", "downshift_option", "missing_data", "feedback_questions", "next_checkpoint",
+    ]
     errors.extend(f"missing:{key}" for key in required if key not in prescription)
     confidence = prescription.get("confidence")
     if not isinstance(confidence, (int, float)) or not 0 <= float(confidence) <= 1:
         errors.append("confidence must be between 0 and 1")
     if readiness not in {"green", "yellow", "red"}:
         errors.append("readiness must be green, yellow, or red")
-    if readiness == "red" and session_type not in {"rest", "rest_or_recovery", "walk", "recovery"}:
+    if prescription.get("decision") not in DECISIONS:
+        errors.append("decision must be one of as_planned, downshift, rest_or_recovery, ask")
+    if readiness == "red" and session_type not in RECOVERY_SESSIONS:
         errors.append("red_readiness_allows_recovery_only")
     if readiness == "yellow" and session_type in QUALITY_TYPES | LONG_TYPES:
         errors.append("yellow_readiness_disallows_quality_or_long_session")
+    intensity = str(session.get("intensity") or "").lower()
+    if readiness == "red" and intensity and intensity not in {"low", "recovery", "easy"}:
+        errors.append("red_readiness_disallows_hard_intensity")
+    if readiness == "yellow" and intensity in HARD_INTENSITIES:
+        errors.append("yellow_readiness_disallows_hard_intensity")
     if session_type in QUALITY_TYPES | LONG_TYPES and isinstance(confidence, (int, float)) and float(confidence) < 0.65:
         errors.append("quality_or_long_session_requires_higher_confidence")
     if session_type in QUALITY_TYPES | LONG_TYPES and not prescription.get("evidence"):
@@ -61,7 +74,7 @@ def validate(prescription: dict[str, Any], context: dict[str, Any] | None = None
         errors.append("next_checkpoint_required")
     flags = context.get("risk_flags") or []
     if any(isinstance(flag, dict) and flag.get("code") in {"medical_red_flag", "gait_altering_pain"} for flag in flags):
-        if session_type not in {"rest", "rest_or_recovery", "walk", "recovery"}:
+        if session_type not in RECOVERY_SESSIONS:
             errors.append("medical_or_gait_risk_requires_recovery")
     if errors:
         return conservative(";".join(errors), readiness if readiness in {"red", "yellow"} else "red")
