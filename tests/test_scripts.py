@@ -59,6 +59,43 @@ class TestAnalyzeFit(unittest.TestCase):
         self.assertTrue(self.result["climbs"], "应识别 5-6.5km 的爬坡段")
         self.assertGreaterEqual(self.result["climbs"][0]["gain_m"], 30)
 
+    def test_hrr_computed_on_fixture(self):
+        self.assertIn("hrr", self.result)
+        self.assertIsNotNone(self.result["hrr"], "fixture 应有心率恢复输出")
+        self.assertIn("final", self.result["hrr"])
+
+    def test_hrr_final_and_stop_recovery(self):
+        rows = []
+        ts = 0
+        dist = 0.0
+        # 20 分钟跑：速度 3 m/s，心率缓升到 149
+        for i in range(1200):
+            rows.append({"ts": ts, "dist": dist, "speed": 3.0, "hr": 140 + i // 120})
+            ts += 1
+            dist += 3.0
+        # 课间停表 90s：心率 149→126（组间恢复）
+        for i in range(90):
+            rows.append({"ts": ts, "dist": dist, "speed": 0.0, "hr": 149 - i // 4})
+            ts += 1
+        # 再跑 5 分钟到 152
+        for i in range(300):
+            rows.append({"ts": ts, "dist": dist, "speed": 3.0, "hr": 145 + i // 10})
+            ts += 1
+            dist += 3.0
+        # 结束后站立 150s：心率 152→118
+        for i in range(150):
+            rows.append({"ts": ts, "dist": dist, "speed": 0.0, "hr": 152 - int(i * 0.22)})
+            ts += 1
+        hrr = analyze_fit.analyze_hrr(rows)
+        self.assertIsNotNone(hrr)
+        self.assertEqual(hrr["final"]["hr_end"], 174)
+        self.assertIsNotNone(hrr["final"]["hr_60s"])
+        self.assertGreater(hrr["final"]["drop_120s"], hrr["final"]["drop_60s"])
+        self.assertEqual(hrr["stop_recovery_count"], 2)  # 课间停表 + 结束站立
+        inter = [r for r in hrr["stop_recoveries"] if r["hr_start"] == 149]
+        self.assertTrue(inter, "应有课间停表恢复段")
+        self.assertGreater(inter[0]["drop_bpm_per_min"], 10)
+
     def test_cadence_decay_flag(self):
         cadence = self.result["cadence"]
         self.assertIsNotNone(cadence)

@@ -17,6 +17,8 @@
   "current_state": {"recovery": {}, "subjective": {}, "environment": {}},
   "fitness": {},
   "goal": {},
+  "athlete": {},
+  "standing_constraints": [],
   "training_history": {},
   "risk_flags": [],
   "evidence": []
@@ -24,6 +26,8 @@
 ```
 
 每个重要结论都应能回指 `evidence` 中的来源、字段、日期窗口和数值。缺失数据不能写成否定事实。
+
+`athlete` 与 `standing_constraints` 来自本地运动员档案（`references/athlete-profile.md`），档案缺失时为空，不伪造。
 
 ## TrainingPrescription
 

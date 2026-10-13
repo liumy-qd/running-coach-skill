@@ -21,6 +21,30 @@ class V2SkillTests(unittest.TestCase):
         self.assertEqual(context["baselines"]["hrv"]["sample_count"], 3)
         self.assertEqual(context["readiness"]["level"], "green")
 
+    def test_profile_fills_goal_and_constraints(self) -> None:
+        profile = {
+            "athlete": {"location": "示例城市"},
+            "goal": {"season_goal": "档案目标"},
+            "standing_constraints": ["课间停表是常态"],
+        }
+        context = build_context(self.bundle, profile)
+        self.assertEqual(context["goal"]["season_goal"], "档案目标")
+        self.assertEqual(context["athlete"]["location"], "示例城市")
+        self.assertEqual(context["standing_constraints"], ["课间停表是常态"])
+
+    def test_bundle_goal_wins_over_profile(self) -> None:
+        bundle = dict(self.bundle)
+        bundle["goal"] = {"season_goal": "当次目标"}
+        context = build_context(bundle, {"goal": {"season_goal": "档案目标"}})
+        self.assertEqual(context["goal"]["season_goal"], "当次目标")
+
+    def test_profile_example_file_loads(self) -> None:
+        profile = json.loads((ROOT / "examples/athlete-profile.json").read_text())
+        context = build_context(self.bundle, profile)
+        self.assertTrue(context["goal"]["race_chain"])
+        self.assertTrue(context["standing_constraints"])
+        self.assertIn("pace_lock_sec_km", context["goal"]["race_chain"][0])
+
     def test_yellow_cannot_upgrade_to_quality(self) -> None:
         self.prescription["session"]["type"] = "interval"
         result = validate(self.prescription, {"readiness": {"level": "yellow"}})

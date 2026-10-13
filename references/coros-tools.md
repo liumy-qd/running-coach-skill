@@ -4,7 +4,7 @@
 
 ## 调用方式
 
-优先使用 agent 原生的 `coros` MCP tools。若当前 agent 没有直接 MCP tool bridge，但本机安装了 `coros-mcp`，使用 CLI 兜底：
+数据接入有两条等价通路：`agents/openai.yaml` 声明的远程 COROS MCP（供支持依赖清单的 harness 自动配置），和本机 `coros-mcp` CLI（通用兜底）。优先使用 agent 原生的 `coros` MCP tools；没有 bridge 时用 CLI：
 
 ```bash
 coros-mcp list-tools --refresh
@@ -86,6 +86,14 @@ coros-mcp call-tool --tool queryDailyHealthData --arguments-json '{"days":7}'
 从 `querySportRecords` 获取 `labelId`、`sportType`、`startTimestamp`、`endTimestamp` 后，再调用圈速和自定义分段工具。若用户只问普通日常建议，不要过度抓取 FIT。
 
 圈速 JSON 可交给 `scripts/analyze_laps.py` 生成紧凑摘要；MCP 文本结果可交给 `scripts/build_coros_summary.py` 归一化（V1 过渡方案，结构化 bundle 优先用 `scripts/build_athlete_context.py`）。
+
+## 已知数据局限
+
+实测中以下端点或字段经常缺失，调用时按此预期：
+
+- `queryHealthCheckTimeSeries`：多数账号无数据。空结果不重试超过一次，改用 `querySleepHrv`、`queryStressLevel` 或 `queryStressTimeSeries` 覆盖同样需求。
+- 左右触地平衡/步态对称：COROS 数据源目前不提供，跑姿分析中明确标注缺失，不要虚构。
+- 日常健康数据密度：心率每日仅 1 个均值，HRV 约每 10 分钟 1 点，压力约每 5 分钟 1 点；做不了日内心率曲线时改用 FIT（仅 race-review）或直接标注密度限制。
 
 ## 常用查询窗口
 

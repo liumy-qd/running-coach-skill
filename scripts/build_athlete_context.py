@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -102,7 +103,8 @@ def coverage(bundle: dict[str, Any], health: list[dict[str, Any]], activities: l
     return {"level": level, "score": score, "present": present, "missing": missing, "stale": stale, "conflicts": conflicts}
 
 
-def build_context(bundle: dict[str, Any]) -> dict[str, Any]:
+def build_context(bundle: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[str, Any]:
+    profile = profile or {}
     health = records(bundle, "daily_health", "health", "daily_metrics")
     sleep = chronological(records(bundle, "sleep", "sleep_data"))
     hrv = chronological(records(bundle, "sleep_hrv", "hrv", "hrv_data"))
@@ -170,7 +172,9 @@ def build_context(bundle: dict[str, Any]) -> dict[str, Any]:
         },
         "current_state": {"recovery": latest_recovery, "health": health[-1] if health else {}, "subjective": subjective, "environment": environment},
         "fitness": bundle.get("fitness") or {},
-        "goal": bundle.get("goal") or {},
+        "goal": bundle.get("goal") or profile.get("goal") or {},
+        "athlete": profile.get("athlete") or {},
+        "standing_constraints": profile.get("standing_constraints") or [],
         "training_history": {"activities": activities, "training_load": load},
         "risk_flags": risk_flags,
         "readiness": {"level": readiness, "action": "rest_or_recovery" if readiness == "red" else "downshift" if readiness == "yellow" else "as_planned"},
@@ -181,9 +185,18 @@ def build_context(bundle: dict[str, Any]) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build AthleteContext V2 from a structured COROS bundle.")
     parser.add_argument("--input", help="JSON bundle path; defaults to stdin.")
+    parser.add_argument("--profile", help="本地运动员档案 JSON（默认 $RUNNING_COACH_PROFILE 或 ~/.running-coach/profile.json，存在才读取）。",
+                        nargs="?", const="default")
     args = parser.parse_args()
+    profile: dict[str, Any] | None = None
+    if args.profile:
+        profile_path = Path(args.profile if args.profile != "default"
+                            else os.environ.get("RUNNING_COACH_PROFILE")
+                            or Path.home() / ".running-coach" / "profile.json").expanduser()
+        if profile_path.exists():
+            profile = json.loads(profile_path.read_text(encoding="utf-8"))
     try:
-        print(json.dumps(build_context(read_json(args.input)), ensure_ascii=False, indent=2))
+        print(json.dumps(build_context(read_json(args.input), profile), ensure_ascii=False, indent=2))
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
     return 0

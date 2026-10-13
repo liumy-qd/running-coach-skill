@@ -39,6 +39,8 @@ STOP_SPEED = 0.5            # 速度低于该值视为停表/步行补给（m/s�
 STOP_MIN_SEC = 10
 CLIMB_GRADE = 0.03
 CLIMB_MIN_GAIN = 15.0
+HRR_MIN_STOP_SEC = 60       # 停表段达到该时长才计算组间心率恢复
+HRR_SLOW_DROP = 12.0        # 跑停后 60s 回落低于该值提示恢复偏慢（启发式，非医疗阈值）
 
 
 def percentile(vals: List[float], pct: float) -> float:
@@ -433,6 +435,64 @@ def analyze_stops(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
             "stops": stops[:8]}
 
 
+def analyze_hrr(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """心率恢复（HRR）：跑停后 +60s/+120s 回落，以及课间停表段的组间恢复。
+
+    停表习惯下组间没有逐秒"恢复慢跑"数据，停表段内的心率回落就是组间 HRR。
+    """
+    with_hr = [r for r in rows if r.get("hr") is not None]
+    if len(with_hr) < 60:
+        return None
+
+    def hr_near(ts: float) -> Optional[int]:
+        after = [r["hr"] for r in with_hr if r["ts"] >= ts]
+        return after[0] if after else None
+
+    moving = [i for i, r in enumerate(rows) if r["speed"] >= STOP_SPEED]
+    if not moving:
+        return None
+    end_row = rows[moving[-1]]
+    end_hr = end_row.get("hr")
+    if end_hr is None:
+        end_hr = next((r["hr"] for r in reversed(with_hr) if r["ts"] <= end_row["ts"]), None)
+    if end_hr is None:
+        return None
+    final: Dict[str, Any] = {"hr_end": end_hr}
+    for label, offset in (("hr_60s", 60), ("hr_120s", 120)):
+        value = hr_near(end_row["ts"] + offset)
+        final[label] = value
+        final[f"drop_{label.split('_')[1]}"] = round(end_hr - value, 1) if value is not None else None
+
+    segments: List[List[Dict[str, Any]]] = []
+    start_idx: Optional[int] = None
+    for i, r in enumerate(rows):
+        if r["speed"] < STOP_SPEED:
+            if start_idx is None:
+                start_idx = i
+        elif start_idx is not None:
+            segments.append(rows[start_idx:i])
+            start_idx = None
+    if start_idx is not None:
+        segments.append(rows[start_idx:])
+    recoveries: List[Dict[str, Any]] = []
+    for segment in segments:
+        duration = segment[-1]["ts"] - segment[0]["ts"]
+        if duration < HRR_MIN_STOP_SEC:
+            continue
+        seg_hrs = [r["hr"] for r in segment if r.get("hr") is not None]
+        if len(seg_hrs) < 2:
+            continue
+        recoveries.append({
+            "km": round(segment[0]["dist"] / 1000.0, 2),
+            "duration_s": duration,
+            "hr_start": seg_hrs[0],
+            "hr_end": seg_hrs[-1],
+            "drop_bpm": round(seg_hrs[0] - seg_hrs[-1], 1),
+            "drop_bpm_per_min": round((seg_hrs[0] - seg_hrs[-1]) / (duration / 60.0), 1),
+        })
+    return {"final": final, "stop_recoveries": recoveries[:6], "stop_recovery_count": len(recoveries)}
+
+
 def analyze_cadence(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     with_cad = [r for r in rows if r.get("cad") is not None]
     if len(with_cad) < 600:
@@ -492,6 +552,7 @@ def analyze(payload: Dict[str, Any], threshold_hr: Optional[int]) -> Dict[str, A
     result["climbs"] = analyze_climbs(rows)
     result["blowups"] = analyze_blowup(splits)
     result["stops"] = analyze_stops(rows)
+    result["hrr"] = analyze_hrr(rows)
     result["cadence"] = analyze_cadence(rows)
     result["hr_zones"] = analyze_zones(rows, threshold_hr)
 
@@ -521,6 +582,15 @@ def analyze(payload: Dict[str, Any], threshold_hr: Optional[int]) -> Dict[str, A
     if stops["total_min"] >= 1:
         flags.append({"severity": "info", "code": "stops",
                       "detail": f"共 {stops['count']} 次停表/步行，合计 {stops['total_min']} 分钟"})
+    hrr = result.get("hrr")
+    if hrr and hrr["final"].get("drop_60s") is not None:
+        drop60 = hrr["final"]["drop_60s"]
+        if drop60 < HRR_SLOW_DROP:
+            flags.append({"severity": "low", "code": "hrr_slow",
+                          "detail": f"跑停后 60s 心率仅回落 {drop60} bpm，提示自主神经恢复偏慢或热负荷（启发式，非医疗结论）"})
+        else:
+            flags.append({"severity": "info", "code": "hrr",
+                          "detail": f"跑停后 60s 心率回落 {drop60} bpm，120s 回落 {hrr['final'].get('drop_120s')} bpm"})
     temp = summary
     if temp.get("temp_start") is not None and temp.get("temp_end") is not None \
             and temp["temp_end"] - temp["temp_start"] >= 5 and drift and drift["overall_drift_bpm"] >= 4:
@@ -599,6 +669,16 @@ def to_markdown(result: Dict[str, Any]) -> str:
     if st and st["count"]:
         marks = ", ".join(f"{x['km']}km({x['duration_s']}s)" for x in st["stops"])
         lines += ["", f"- 停表/步行：{st['count']} 次，共 {st['total_min']} min @ {marks}"]
+
+    h = result.get("hrr")
+    if h:
+        fin = h["final"]
+        if fin.get("drop_60s") is not None:
+            tail = f"，+120s 回落 {fin['drop_120s']} bpm" if fin.get("drop_120s") is not None else ""
+            lines += ["", f"- 心率恢复：跑停 {fin['hr_end']} bpm，+60s 回落 {fin['drop_60s']} bpm{tail}"]
+        if h["stop_recoveries"]:
+            avg_rate = statistics.fmean(x["drop_bpm_per_min"] for x in h["stop_recoveries"])
+            lines += [f"- 课间停表恢复 {h['stop_recovery_count']} 段（组间 HRR），平均回落速度 {avg_rate:.1f} bpm/min"]
 
     if result["flags"]:
         lines += ["", "## 标记", ""]

@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-08-01",
+  "athlete": {
+    "nickname": "示例跑者",
+    "location": "示例城市",
+    "devices": ["COROS"]
+  },
+  "goal": {
+    "season_goal": "秋季马拉松 PB（合成示例数据）",
+    "race_chain": [
+      {
+        "race": "示例城市全马",
+        "date": "2026-10-18",
+        "target": "3:30-3:35",
+        "pace_lock_sec_km": [278, 281]
+      },
+      {
+        "race": "示例城市半马",
+        "date": "2026-12-06",
+        "target": "1:38-1:40"
+      }
+    ]
+  },
+  "standing_constraints": [
+    "课间停表是常态，停表段按组间恢复解读，不批评恢复不足",
+    "常在田径场训练，同配速与公路差 3-5 秒/km"
+  ],
+  "notes": "合成示例数据，用于展示档案结构；不含任何真实个人信息。"
+}
