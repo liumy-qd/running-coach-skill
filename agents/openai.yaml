@@ -1,3 +1,6 @@
+# 依赖声明：供支持 dependency manifest 的 harness（如 Codex）自动配置远程 COROS MCP。
+# 不读取本文件的 harness 使用本地 coros-mcp CLI 兜底（见 references/coros-tools.md），
+# 两条通路等价，优先用 harness 原生 MCP bridge。
 interface:
   display_name: "跑步教练"
   short_description: "用高驰数据生成可校验的恢复判断与训练处方"
