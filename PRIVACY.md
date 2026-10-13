@@ -6,7 +6,7 @@ This repository is designed to be safe for public use and contribution.
 
 Never commit:
 
-- COROS access tokens or refresh tokens.
+- Watch-vendor access tokens or refresh tokens (COROS OAuth, Garmin/garth tokens).
 - OAuth callback URLs or state parameters.
 - Passwords, API keys, or secrets.
 - Real health exports.
@@ -18,9 +18,9 @@ Never commit:
 
 Examples in this repository are synthetic. When reporting issues, use synthetic, anonymized, or heavily redacted samples.
 
-## Local COROS Access
+## Local Watch Data Access
 
-Real COROS access should stay local to your machine through your MCP or CLI configuration. This skill only documents how an agent should use that local toolchain; it does not require credentials to be stored in the repository.
+Real COROS access should stay local to your machine through your MCP or CLI configuration; Garmin tokens stay local under `~/.garmintokens`. This skill only documents how an agent should use that local toolchain; it does not require credentials to be stored in the repository.
 
 FIT downloads are opt-in for a key activity analysis. Do not download or retain them for ordinary daily checks.
 

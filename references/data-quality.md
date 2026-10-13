@@ -29,8 +29,8 @@
 
 ## 来源优先级
 
-1. COROS MCP 原始工具结果。
-2. `coros-mcp call-tool` CLI 兜底结果。
+1. 手表数据源的原始结果（COROS MCP 工具，或佳明 `garmin_to_bundle.py` 抓取）。
+2. CLI/适配器脚本的兜底结果。
 3. 用户提供的导出或截图。
 4. 用户文字描述。
 

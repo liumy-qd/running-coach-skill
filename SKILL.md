@@ -1,17 +1,17 @@
 ---
 name: running-coach
-description: 面向高驰 COROS 用户的个人跑步数据管理、跨平台授权、每日恢复门控、活动分析、训练处方、周复盘、比赛深度复盘和目标赛事计划工作流。Use when the user asks about COROS/高驰 data or login, daily readiness, sleep HRV, resting heart rate, stress, recovery, training load, running fitness, race predictions, FIT/lap/segment analysis, weekly review, race deep review, running form or gait analysis, injury or fatigue risk, weather or fueling impact, or 5K/10K/half-marathon/marathon planning. Also trigger on 今天能不能跑、要不要跑步、膝盖疼还能跑吗、配速怎么样、比赛复盘、深度复盘一场比赛、看看我的跑姿.
+description: 个人跑步数据管理、跨平台授权、每日恢复门控、活动分析、训练处方、周复盘、比赛深度复盘和目标赛事计划工作流，支持高驰 COROS 与佳明 Garmin 手表。Use when the user asks about COROS/高驰 or Garmin/佳明 watch data or login, daily readiness, sleep HRV, resting heart rate, stress, recovery, training load, running fitness, race predictions, FIT/lap/segment analysis, weekly review, race deep review, running form or gait analysis, injury or fatigue risk, weather or fueling impact, or 5K/10K/half-marathon/marathon planning. Also trigger on 今天能不能跑、要不要跑步、膝盖疼还能跑吗、配速怎么样、比赛复盘、深度复盘一场比赛、看看我的跑姿.
 ---
 
 # Running Coach
 
 ## 核心流程
 
-优先使用 `coros` MCP；当前 agent 没有原生 bridge 时，使用 `coros-mcp call-tool`。不要输出或保存 token、OAuth state、poll token、授权链接、回调参数或真实健康导出。FIT 原件仅在 `race-review` 时下载到临时目录、解析后立即删除（流程见 `references/fit-deep-review.md`）；任何时候不输出 GPS 轨迹坐标和原始逐秒数据。
+数据接入按手表品牌选择通路：COROS 优先使用 `coros` MCP，当前 agent 没有原生 bridge 时用 `coros-mcp call-tool`；佳明用 `scripts/garmin_to_bundle.py` 抓取或归一（见 `references/garmin-tools.md`）。不要输出或保存 token、OAuth state、poll token、授权链接、回调参数或真实健康导出。FIT 原件仅在 `race-review` 时下载到临时目录、解析后立即删除（流程见 `references/fit-deep-review.md`）；任何时候不输出 GPS 轨迹坐标和原始逐秒数据。
 
 1. 将请求分类为 `daily-check`、`weekly-review`、`activity-review`、`race-review`、`form-review`、`race-plan`、`data-inventory` 或 `coros-auth`。
-2. 获取完成任务所需的最小数据。先读取 `references/coros-tools.md`，严格按实时工具 Schema 传参。佳明用户按 `references/garmin-tools.md` 用 `scripts/garmin_to_bundle.py` 归一后走同一流程。目标链、锁定配速、场地与停表习惯等长期上下文优先读本地运动员档案（`references/athlete-profile.md`），缺项再问用户。
-3. 遇到未登录、授权过期或 `401` 时，读取 `references/coros-auth.md` 并运行 `scripts/coros_auth_bootstrap.py --mode auto`；验证通过后继续原任务。
+2. 获取完成任务所需的最小数据，按手表品牌读取对应接入文档：COROS 读 `references/coros-tools.md` 并严格按实时工具 Schema 传参；佳明读 `references/garmin-tools.md` 用 `scripts/garmin_to_bundle.py` 归一后走同一流程。目标链、锁定配速、场地与停表习惯等长期上下文优先读本地运动员档案（`references/athlete-profile.md`），缺项再问用户。
+3. 遇到未登录、授权过期或 `401` 时按品牌处理：COROS 读 `references/coros-auth.md` 并运行 `scripts/coros_auth_bootstrap.py --mode auto`；佳明运行 `scripts/garmin_to_bundle.py --login` 重建本地 token（存 `~/.garmintokens`）。验证通过后继续原任务。
 4. 将工具结果整理成紧凑上下文。结构化 bundle 使用 `scripts/build_athlete_context.py`；旧版 MCP 文本可继续使用 `scripts/build_coros_summary.py`。
 5. 先执行确定性恢复与风险门控，再进行语义综合。数值聚合、趋势、负荷比、漂移和处方约束交给脚本，不让模型凭长文本估算。
 6. 普通日常建议和周复盘不下载 FIT。仅 `race-review` 按临时下载流程解析 FIT 做细粒度分析；`race-plan` 仍以圈速为主。
@@ -37,7 +37,7 @@ description: 面向高驰 COROS 用户的个人跑步数据管理、跨平台授
 - 至少使用两个相互支持的信号下强结论；信号冲突时明确冲突并采用保守选项。
 - `red`：只允许休息、步行或恢复活动；`yellow`：最高为轻松强度；`green`：仍需满足计划、训练史和环境约束才允许质量课。
 - 胸痛、晕厥、异常呼吸/心律、影响步态的疼痛或热病表现优先停止训练并建议专业评估。不要进行医疗诊断。
-- COROS 预测成绩仅作体能信号。配速建议必须绑定阈值、近期同类训练、目标或心率/RPE。
+- 厂商预测成绩（COROS、佳明等）仅作体能信号。配速建议必须绑定阈值、近期同类训练、目标或心率/RPE。
 
 ## 输出契约
 

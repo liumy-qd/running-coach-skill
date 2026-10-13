@@ -56,8 +56,10 @@ jobs:
           for path in [
               "agents/openai.yaml",
               "references/coros-tools.md",
+              "references/garmin-tools.md",
               "scripts/analyze_laps.py",
               "scripts/build_coros_summary.py",
+              "scripts/garmin_to_bundle.py",
               "scripts/evaluate_context.py",
               "scripts/build_athlete_context.py",
               "scripts/validate_prescription.py",

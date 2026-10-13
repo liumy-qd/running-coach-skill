@@ -5,9 +5,9 @@
 [![GitHub release](https://img.shields.io/github/v/release/liumy-qd/running-coach-skill?include_prereleases&label=release)](https://github.com/liumy-qd/running-coach-skill/releases)
 [![GitHub stars](https://img.shields.io/github/stars/liumy-qd/running-coach-skill?style=social)](https://github.com/liumy-qd/running-coach-skill/stargazers)
 
-An Agent Skill for COROS runners, following the open [agentskills.io](https://agentskills.io) format. Works with OpenAI Codex, ZCode, Qwen Code, Kimi Code, Deep Code and other skill-compatible agents (office/consumer apps such as WorkBuddy and Coze: see [非编程用户应用](#非编程用户应用workbuddy--扣子--消费级智能体)); daily readiness, sleep HRV recovery, training load, lap/FIT analysis, structured athlete context, validated training prescriptions, fueling, weather risk, injury risk, and race plans from 5K to marathon.
+An Agent Skill for runners with a COROS or Garmin watch, following the open [agentskills.io](https://agentskills.io) format. Works with OpenAI Codex, ZCode, Qwen Code, Kimi Code, Deep Code and other skill-compatible agents (office/consumer apps such as WorkBuddy and Coze: see [非编程用户应用](#非编程用户应用workbuddy--扣子--消费级智能体)); daily readiness, sleep HRV recovery, training load, lap/FIT analysis, structured athlete context, validated training prescriptions, fueling, weather risk, injury risk, and race plans from 5K to marathon.
 
-中文快速入口：这是一个面向高驰 COROS 跑者的 Agent Skill（遵循 agentskills.io 开放格式，兼容 Codex、ZCode、Qwen Code、Kimi Code 等），用于分析恢复、训练负荷、圈速分段、补给、天气热应激、伤病风险，并生成 5K/10K/半马/全马训练建议。
+中文快速入口：这是一个面向跑步手表用户的 Agent Skill，支持高驰 COROS 与佳明 Garmin（遵循 agentskills.io 开放格式，兼容 Codex、ZCode、Qwen Code、Kimi Code 等），用于分析恢复、训练负荷、圈速分段、补给、天气热应激、伤病风险，并生成 5K/10K/半马/全马训练建议。
 
 ```text
 Use $running-coach to analyze my recent COROS running data and give today's training recommendation.
@@ -15,7 +15,7 @@ Use $running-coach to analyze my recent COROS running data and give today's trai
 
 ## Why This Skill
 
-Most running dashboards show data. This skill turns COROS data into an agent-friendly coaching workflow:
+Most running dashboards show data. This skill turns watch data (COROS or Garmin) into an agent-friendly coaching workflow:
 
 - Check data quality before making a recommendation.
 - Build personal 7/28/56 day baselines for sleep, HRV, resting heart rate, running volume, long runs, and quality sessions.
@@ -47,7 +47,7 @@ mkdir -p ~/.agents/skills
 git clone https://github.com/liumy-qd/running-coach-skill ~/.agents/skills/running-coach
 ```
 
-唯一的外部依赖是数据接入（二选一）：harness 支持 MCP 时配置 COROS MCP；否则安装本机 `coros-mcp` CLI（授权引导见 [references/coros-auth.md](references/coros-auth.md)）。运行脚本只需 Python ≥3.8 标准库；仅解析 FIT 二进制时需要 `pip install fitdecode`（JSON 输入路径不需要）。
+唯一的外部依赖是数据接入，按手表品牌二选一：COROS 用户在支持 MCP 的 harness 里配置 COROS MCP，或安装本机 `coros-mcp` CLI（授权引导见 [references/coros-auth.md](references/coros-auth.md)）；佳明用户 `pip install garminconnect garth` 后用适配器脚本登录抓取（见 [references/garmin-tools.md](references/garmin-tools.md)）。运行脚本只需 Python ≥3.8 标准库；仅解析 FIT 二进制时需要 `pip install fitdecode`（JSON 输入路径不需要）。
 
 Run the synthetic examples:
 
@@ -141,7 +141,7 @@ More examples:
 ## How It Works
 
 1. Classify the request: daily check, weekly review, activity review, race review, form review, race plan, data inventory, or COROS auth.
-2. Pull the minimum required COROS data.
+2. Pull the minimum required watch data (per-brand access: COROS or Garmin).
 3. Build a compact AthleteContext with coverage, baselines, risk flags, and evidence (merged with the local athlete profile when present).
 4. Gate training intensity deterministically before the model explains the plan.
 5. Deep-dive key activities when needed.
@@ -164,14 +164,21 @@ More examples:
 └── .github/
 ```
 
-## COROS Data Access
+## Watch Data Access
 
-两条等价的数据通路，可按 harness 能力任选：
+数据接入按手表品牌选择通路：
+
+### COROS
 
 - **远程 COROS MCP**：`agents/openai.yaml` 声明了 streamable_http 的 MCP server，供支持依赖清单的 harness（如 Codex）自动配置。
 - **本地 `coros-mcp` CLI**：通用兜底，任何能执行 shell 命令的 harness 都可用；授权引导见 [references/coros-auth.md](references/coros-auth.md)，工具清单见 [references/coros-tools.md](references/coros-tools.md)。
 
-优先使用 harness 原生 MCP bridge；没有 bridge 时用 CLI。真实凭证只留在本机，不要提交 token、OAuth 回调参数、密码或私有健康导出文件。
+### Garmin
+
+- **适配器脚本**：`scripts/garmin_to_bundle.py` 登录（garth token 存本机 `~/.garmintokens`）后抓取，归一为与 COROS 相同的 bundle；映射与语义差异见 [references/garmin-tools.md](references/garmin-tools.md)。
+- **比赛 FIT**：佳明活动可直接下载 FIT 交给现有深度复盘管线。
+
+优先使用 harness 原生 MCP bridge；没有 bridge 时用 CLI/脚本。真实凭证只留在本机，不要提交 token、OAuth 回调参数、密码或私有健康导出文件。
 
 ## Validation
 
@@ -202,9 +209,9 @@ python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .
 
 ## FAQ
 
-### Does this require real COROS credentials?
+### Does this require real watch credentials?
 
-No. The repository examples are synthetic. Real COROS access is optional and should happen through your local MCP or CLI environment, not through committed files.
+No. The repository examples are synthetic. Real COROS or Garmin access is optional and should happen through your local MCP, CLI, or adapter environment, not through committed files.
 
 ### Is this medical advice?
 
@@ -234,7 +241,7 @@ git clone https://github.com/liumy-qd/running-coach-skill ~/.agents/skills/runni
 使用：
 
 ```text
-使用 $running-coach 分析我近期的高驰数据，判断今天适合休息、轻松跑还是质量课。
+使用 $running-coach 分析我近期的高驰/佳明手表数据，判断今天适合休息、轻松跑还是质量课。
 ```
 
 非编程用户（WorkBuddy、扣子等）请看上面的「非编程用户应用」小节。
