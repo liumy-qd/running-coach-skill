@@ -124,6 +124,7 @@ More examples:
 | Area | What it does |
 | --- | --- |
 | COROS workflow | Uses COROS MCP first, with `coros-mcp` CLI as fallback. |
+| Garmin adapter | `garmin_to_bundle.py` normalizes Garmin Connect data (sleep, HRV rMSSD, stress, training load, Training Readiness, activities) into the same pipeline; race FIT files feed the deep-review analyzer directly. Per-source baselines keep HRV metrics from being mixed across vendors. |
 | Readiness | Combines sleep, HRV, resting heart rate, stress, recovery, load, pain, and recent workouts. |
 | Personal baselines | Uses 7/28/56 day trends instead of generic thresholds only. |
 | Lap analysis | Detects cardiac drift, pace fade, interval candidates, segment stability, and long-run risk. |

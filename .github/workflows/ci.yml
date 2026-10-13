@@ -36,6 +36,8 @@ jobs:
           python3 scripts/validate_prescription.py --input examples/prescription-safe.json --context /tmp/athlete-context.json
           python3 scripts/archive_snapshot.py --input examples/athlete-bundle.json --context /tmp/athlete-context.json --prescription examples/prescription-safe.json --archive-dir /tmp/rc-archive
           python3 scripts/archive_snapshot.py --stats --days 36500 --archive-dir /tmp/rc-archive
+          python3 scripts/garmin_to_bundle.py --input tests/fixtures/garmin_raw.json --output /tmp/garmin-bundle.json
+          python3 scripts/build_athlete_context.py --input /tmp/garmin-bundle.json | grep -q '"source_device": "garmin"'
 
       - name: Validate skill metadata
         run: |

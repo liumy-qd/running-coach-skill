@@ -10,7 +10,7 @@ description: 面向高驰 COROS 用户的个人跑步数据管理、跨平台授
 优先使用 `coros` MCP；当前 agent 没有原生 bridge 时，使用 `coros-mcp call-tool`。不要输出或保存 token、OAuth state、poll token、授权链接、回调参数或真实健康导出。FIT 原件仅在 `race-review` 时下载到临时目录、解析后立即删除（流程见 `references/fit-deep-review.md`）；任何时候不输出 GPS 轨迹坐标和原始逐秒数据。
 
 1. 将请求分类为 `daily-check`、`weekly-review`、`activity-review`、`race-review`、`form-review`、`race-plan`、`data-inventory` 或 `coros-auth`。
-2. 获取完成任务所需的最小数据。先读取 `references/coros-tools.md`，严格按实时工具 Schema 传参。目标链、锁定配速、场地与停表习惯等长期上下文优先读本地运动员档案（`references/athlete-profile.md`），缺项再问用户。
+2. 获取完成任务所需的最小数据。先读取 `references/coros-tools.md`，严格按实时工具 Schema 传参。佳明用户按 `references/garmin-tools.md` 用 `scripts/garmin_to_bundle.py` 归一后走同一流程。目标链、锁定配速、场地与停表习惯等长期上下文优先读本地运动员档案（`references/athlete-profile.md`），缺项再问用户。
 3. 遇到未登录、授权过期或 `401` 时，读取 `references/coros-auth.md` 并运行 `scripts/coros_auth_bootstrap.py --mode auto`；验证通过后继续原任务。
 4. 将工具结果整理成紧凑上下文。结构化 bundle 使用 `scripts/build_athlete_context.py`；旧版 MCP 文本可继续使用 `scripts/build_coros_summary.py`。
 5. 先执行确定性恢复与风险门控，再进行语义综合。数值聚合、趋势、负荷比、漂移和处方约束交给脚本，不让模型凭长文本估算。
@@ -51,6 +51,7 @@ description: 面向高驰 COROS 用户的个人跑步数据管理、跨平台授
 ## 按需参考
 
 - COROS 工具与参数：`references/coros-tools.md`
+- 佳明数据接入（映射、语义差异、FIT 复用）：`references/garmin-tools.md`
 - 授权和远程环境：`references/coros-auth.md`
 - V2 上下文与处方 Schema：`references/v2-schemas.md`
 - 覆盖度和来源置信度：`references/data-quality.md`
@@ -72,13 +73,14 @@ description: 面向高驰 COROS 用户的个人跑步数据管理、跨平台授
 - `analyze_fit.py`：FIT 细粒度复盘：公里分段与 GAP、坡度-配速-心率关联、同配速漂移、爆点、爬坡段、心率区间、心率恢复（HRR）。
 - `evaluate_context.py`：评估 readiness 并生成保守的基础训练处方。
 - `validate_prescription.py`：校验 LLM 或脚本生成的训练处方是否符合安全上限。
+- `garmin_to_bundle.py`：把佳明 Garmin 数据（garminconnect 抓取或保存的原始 JSON）归一为标准 bundle，接入同一门控与归档流程。
 - `coros_auth_bootstrap.py`：跨平台引导 COROS 授权并验证只读接口。
 - `save_report.py`：仅在用户要求保存时写入 Markdown 报告。
 - `archive_snapshot.py`：把每次取数抽成瘦身快照归档到仓库外本地档案（按月 JSONL、upsert 去重、写入前脱敏扫描），并支持 `--show/--stats` 查询。
 
 ## 测试
 
-`tests/test_scripts.py` 和 `tests/test_archive.py` 覆盖全部脚本（含 36 个处方安全场景、FIT/圈速 fixture 回归与档案脱敏/upsert）。修改脚本或阈值后运行：
+`tests/test_scripts.py`、`tests/test_v2.py`、`tests/test_archive.py`、`tests/test_garmin.py` 覆盖全部脚本（含 36 个处方安全场景、FIT/圈速/佳明 fixture 回归与档案脱敏/upsert）。修改脚本或阈值后运行：
 
 ```bash
 python3 -m unittest discover -s tests

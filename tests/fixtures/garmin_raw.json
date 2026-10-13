@@ -1,0 +1,26 @@
+{
+  "as_of": "2026-10-13T08:00:00+08:00",
+  "timezone": "Asia/Shanghai",
+  "sleep": [
+    {"dailySleepValues": {"calendarDate": "2026-10-11", "sleepTimeSeconds": 25000, "sleepScores": {"overall": 71}}},
+    {"dailySleepValues": {"calendarDate": "2026-10-12", "sleepTimeSeconds": 21960, "sleepScores": {"overall": 64}}}
+  ],
+  "hrv": [
+    {"hrvSummary": {"calendarDate": "2026-10-11", "lastNightAvg": 51, "baseline": 52.0}},
+    {"hrvSummary": {"calendarDate": "2026-10-12", "lastNightAvg": 47, "baseline": 52.0}}
+  ],
+  "stress": [
+    {"calendarDate": "2026-10-11", "averageStressLevel": 27},
+    {"calendarDate": "2026-10-12", "stressValuesArray": [{"stressLevel": 20}, {"stressLevel": 40}, {"stressLevel": 30}]}
+  ],
+  "resting_hr": [
+    {"calendarDate": "2026-10-11", "restingHeartRate": 53},
+    {"calendarDate": "2026-10-12", "restingHeartRate": 52}
+  ],
+  "training_status": {"currentTrainingLoad": {"acuteLoad": 480, "chronicLoad": 420}, "vO2Max": 51},
+  "training_readiness": {"date": "2026-10-13", "score": 76},
+  "activities": [
+    {"activityId": 1001, "activityType": {"typeKey": "running"}, "startTimeLocal": "2026-10-11T18:30:00.0", "distance": 11000, "duration": 3600, "averageHR": 148, "activityTrainingLoad": 180},
+    {"activityId": 1002, "activityType": {"typeKey": "treadmill_running"}, "startTimeLocal": "2026-10-12T18:10:00.0", "distance": 8000, "duration": 2520, "averageHR": 138}
+  ]
+}
