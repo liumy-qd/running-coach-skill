@@ -52,6 +52,7 @@ description: 个人跑步数据管理、跨平台授权、每日恢复门控、�
 
 - COROS 工具与参数：`references/coros-tools.md`
 - 佳明数据接入（映射、语义差异、FIT 复用）：`references/garmin-tools.md`
+- 门控 MCP Server（本地 stdio，供 WorkBuddy 等桌面连接器）：`references/mcp-server.md`
 - 授权和远程环境：`references/coros-auth.md`
 - V2 上下文与处方 Schema：`references/v2-schemas.md`
 - 覆盖度和来源置信度：`references/data-quality.md`
@@ -75,6 +76,7 @@ description: 个人跑步数据管理、跨平台授权、每日恢复门控、�
 - `validate_prescription.py`：校验 LLM 或脚本生成的训练处方是否符合安全上限。
 - `garmin_to_bundle.py`：把佳明 Garmin 数据（garminconnect 抓取或保存的原始 JSON）归一为标准 bundle，接入同一门控与归档流程。
 - `coros_auth_bootstrap.py`：跨平台引导 COROS 授权并验证只读接口。
+- `gating_mcp.py`：把门控与处方校验封装为本地 stdio MCP server（WorkBuddy 等桌面连接器用；管道需 `pip install mcp`，调度与自检不需要）。
 - `save_report.py`：仅在用户要求保存时写入 Markdown 报告。
 - `archive_snapshot.py`：把每次取数抽成瘦身快照归档到仓库外本地档案（按月 JSONL、upsert 去重、写入前脱敏扫描），并支持 `--show/--stats` 查询。
 

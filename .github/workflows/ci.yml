@@ -39,6 +39,7 @@ jobs:
           python3 scripts/garmin_to_bundle.py --input tests/fixtures/garmin_raw.json --output /tmp/garmin-bundle.json
           grep -q '"source_device": "garmin"' /tmp/garmin-bundle.json
           python3 scripts/build_athlete_context.py --input /tmp/garmin-bundle.json | grep -q '"name": "garmin"'
+          python3 scripts/gating_mcp.py --selfcheck
 
       - name: Validate skill metadata
         run: |
@@ -65,6 +66,8 @@ jobs:
               "scripts/build_athlete_context.py",
               "scripts/validate_prescription.py",
               "scripts/coros_auth_bootstrap.py",
+              "scripts/gating_mcp.py",
+              "references/mcp-server.md",
               "references/v2-schemas.md",
           ]:
               if not Path(path).exists():

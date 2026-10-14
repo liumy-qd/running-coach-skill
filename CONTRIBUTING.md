@@ -23,5 +23,6 @@ python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json > 
 python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json --profile examples/athlete-profile.json > /tmp/athlete-context-profile.json
 python3 scripts/validate_prescription.py --input examples/prescription-safe.json --context /tmp/athlete-context.json
 python3 scripts/archive_snapshot.py --input examples/athlete-bundle.json --context /tmp/athlete-context.json --archive-dir /tmp/rc-archive
+python3 scripts/gating_mcp.py --selfcheck
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```

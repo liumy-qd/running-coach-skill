@@ -82,8 +82,8 @@ Use $running-coach to review my last 14 days of COROS running data and tell me w
 
 | 层 | 代表应用 | 适配方式 | 降级说明 |
 | --- | --- | --- | --- |
-| 带技能市场的办公 Agent | 腾讯 WorkBuddy（CodeBuddy 团队） | 从其技能市场一键安装（内置 30+ 技能、社区上万个，`/` 调用，支持自建技能）；COROS 数据经「连接器」接入远程 MCP（`agents/openai.yaml` 声明的 server） | 技能格式是否完全兼容 SKILL.md 以官方文档为准（待实测）；本地数据档案与运动员档案（`~/.running-coach/`）不可用；脚本能否执行取决于其沙箱能力 |
-| MCP 智能体平台 | 扣子（Coze）、文心智能体、Dify 等 | 把 `SKILL.md` + `references/` 导入为知识库/系统提示词，COROS MCP 挂载为工具 | 确定性门控退化为"模型按规则执行"，没有代码级处方校验；只依赖保守阈值兜底 |
+| 带技能市场的办公 Agent | 腾讯 WorkBuddy（CodeBuddy 团队） | 从其技能市场一键安装（内置 30+ 技能、社区上万个，`/` 调用，支持自建技能）；「连接器」同时挂 COROS 远程 MCP（取数）与本地门控 MCP server（`gating_mcp.py`，stdio，见 [references/mcp-server.md](references/mcp-server.md)） | 技能格式是否完全兼容 SKILL.md 以官方文档为准（待实测）；门控 MCP 需一次性安装 Python 与 `pip install mcp`；本地档案经门控 server 的 `archive_snapshot` 工具可用 |
+| MCP 智能体平台 | 扣子（Coze）、文心智能体、Dify 等 | 把 `SKILL.md` + `references/` 导入为知识库/系统提示词，COROS MCP 挂载为工具 | 纯云端平台接不了本地 stdio，确定性门控退化为"模型按规则执行"，没有代码级处方校验；只依赖保守阈值兜底 |
 | 纯对话助手 | 豆包、Kimi、通义等 App | 仅导入 `references/` 作为知识库 | 无实时数据、无脚本校验，只能给规则性建议，输出需明确标注降级模式 |
 
 隐私注意：经远程 MCP 取数意味着健康数据离开本机（敏感个人信息传输），必须用户明确知情后使用；本仓库的本地档案、脱敏扫描等能力仅适用于本机运行场景。智能体平台侧的留存与合规由该平台策略决定。
@@ -125,6 +125,7 @@ More examples:
 | --- | --- |
 | COROS workflow | Uses COROS MCP first, with `coros-mcp` CLI as fallback. |
 | Garmin adapter | `garmin_to_bundle.py` normalizes Garmin Connect data (sleep, HRV rMSSD, stress, training load, Training Readiness, activities) into the same pipeline; race FIT files feed the deep-review analyzer directly. Per-source baselines keep HRV metrics from being mixed across vendors. |
+| Local gating MCP server | `gating_mcp.py` exposes the deterministic gating tools (context building, readiness evaluation, prescription validation, data archive) over local stdio MCP — desktop harnesses like WorkBuddy get code-level safety gates via one connector entry; data never leaves the machine. |
 | Readiness | Combines sleep, HRV, resting heart rate, stress, recovery, load, pain, and recent workouts. |
 | Personal baselines | Uses 7/28/56 day trends instead of generic thresholds only. |
 | Lap analysis | Detects cardiac drift, pace fade, interval candidates, segment stability, and long-run risk. |
@@ -200,7 +201,6 @@ python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .
 
 ## Roadmap
 
-- Package the deterministic gating scripts (`build_athlete_context` / `evaluate_context` / `validate_prescription`) as a remote MCP server, so MCP-capable consumer apps (WorkBuddy connectors, Coze) get code-level safety gates without local Python.
 - Verify WorkBuddy skill-marketplace format compatibility and publish there if SKILL.md-compatible.
 - Add more synthetic examples for 5K, 10K, half marathon, marathon, recovery week, and heat-stress scenarios.
 - Add more optional parser adapters for direct MCP JSON bundles from different clients.
