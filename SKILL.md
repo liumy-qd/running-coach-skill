@@ -1,6 +1,6 @@
 ---
 name: running-coach
-description: 个人跑步数据管理、跨平台授权、每日恢复门控、活动分析、训练处方、周复盘、比赛深度复盘和目标赛事计划工作流，支持高驰 COROS 与佳明 Garmin 手表。Use when the user asks about COROS/高驰 or Garmin/佳明 watch data or login, daily readiness, sleep HRV, resting heart rate, stress, recovery, training load, running fitness, race predictions, FIT/lap/segment analysis, weekly review, race deep review, running form or gait analysis, injury or fatigue risk, weather or fueling impact, or 5K/10K/half-marathon/marathon planning. Also trigger on 今天能不能跑、要不要跑步、膝盖疼还能跑吗、配速怎么样、比赛复盘、深度复盘一场比赛、看看我的跑姿.
+description: 个人跑步教练 skill，支持高驰 COROS 与佳明 Garmin 手表：每日恢复门控、活动与圈速分析、训练处方校验、周复盘、比赛深度复盘、5K 到全马训练计划。Use when the user mentions COROS/高驰/佳明/Garmin、手表数据、登录/授权，or asks about daily readiness, 睡眠, HRV, 静息心率, 压力, 恢复, training load 负荷, 配速, race prediction 成绩预测, FIT/lap/segment analysis, weekly review 周复盘, 比赛复盘/深度复盘, running form 跑姿, injury/fatigue risk 伤病疲劳, weather 天气, fueling 补给, or 5K/10K/半马/全马/马拉松计划. Also trigger on 今天能不能跑、要不要跑步、能上强度吗、恢复好了吗、看下早上的状态、晨检、跑完了帮我分析下、复盘今天的跑、课表怎么调、这组课表可以吗、配速定多少、马配、间歇、长距离拉练、跑量够吗、心率偏高、HRV 低、睡得不好、膝盖疼还能跑吗、脚踝疼、破三、PB、比赛策略、跑前吃什么.
 ---
 
 # Running Coach

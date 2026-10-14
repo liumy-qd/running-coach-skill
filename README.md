@@ -185,19 +185,11 @@ More examples:
 
 ```bash
 python3 -m py_compile scripts/*.py
-python3 scripts/analyze_laps.py --input examples/laps.json --json
-python3 scripts/build_coros_summary.py --input examples/coros-summary.txt
-python3 scripts/evaluate_context.py --input examples/context-summary.json --markdown
-python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json > /tmp/athlete-context.json
-python3 scripts/validate_prescription.py --input examples/prescription-safe.json --context /tmp/athlete-context.json
 python3 -m unittest discover -s tests -p 'test_*.py'
+python3 scripts/gating_mcp.py --selfcheck
 ```
 
-If you have Codex's `skill-creator` validation script available:
-
-```bash
-python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .
-```
+Full pre-PR checklist (including synthetic example round-trips) is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Roadmap
 
@@ -217,34 +209,19 @@ No. The repository examples are synthetic. Real COROS or Garmin access is option
 
 No. It is a coaching workflow for training decisions. Chest pain, fainting, abnormal heart rhythm, acute injury, or persistent pain should be handled by a qualified professional.
 
-### Can it work without COROS MCP?
+### Can it work without watch MCP/CLI?
 
-Yes, partially. The scripts can analyze synthetic or exported summaries. For live coaching, COROS MCP or `coros-mcp` gives the agent a better data source.
+Yes, partially. The scripts can analyze synthetic or exported summaries. For live coaching, COROS MCP/CLI or the Garmin adapter gives the agent a better data source.
 
 ## 中文说明
 
-这个项目的核心不是“看数据”，而是帮助 Codex 按教练流程使用数据：
+核心不是“看数据”，而是让 agent 按教练流程使用数据：数据可靠性判断 → 个人基线与恢复门控 → 圈速/漂移/间歇分析 → 天气、补给、伤病修正 → 可执行训练（含停止规则与降级选项）。支持高驰 COROS 与佳明 Garmin。
 
-- 先判断数据是否足够可靠。
-- 再用个人基线判断今天能不能上强度。
-- 对关键跑步做圈速、分段、心率漂移和间歇稳定性分析。
-- 把天气、热湿、补给、疲劳和疼痛纳入训练建议。
-- 最后给出可执行训练、停止规则、降级选项和复盘问题。
-
-安装：按 [Quick Start](#quick-start) 的安装矩阵选择对应 harness 的目录，例如 ZCode：
-
-```bash
-mkdir -p ~/.agents/skills
-git clone https://github.com/liumy-qd/running-coach-skill ~/.agents/skills/running-coach
-```
-
-使用：
+安装见 [Quick Start](#quick-start)；非编程用户（WorkBuddy、扣子等）见「非编程用户应用」。
 
 ```text
 使用 $running-coach 分析我近期的高驰/佳明手表数据，判断今天适合休息、轻松跑还是质量课。
 ```
-
-非编程用户（WorkBuddy、扣子等）请看上面的「非编程用户应用」小节。
 
 ## License
 
