@@ -108,26 +108,36 @@ def load_fit(path: str) -> Dict[str, Any]:
 def _load_fit_fitdecode(path: str) -> Dict[str, Any]:
     import fitdecode
 
+    def field(frame: Any, name: str) -> Any:
+        # FIT record 的字段集随消息定义变化（如 COROS 越野可能缺 speed），缺失时静默跳过
+        try:
+            return frame.get_value(name)
+        except KeyError:
+            return None
+
     records: List[Dict[str, Any]] = []
     with open(path, "rb") as handle:
         for frame in fitdecode.FitReader(handle):
             if frame.frame_type != fitdecode.FIT_FRAME_DATA or frame.name != "record":
                 continue
             row: Dict[str, Any] = {}
-            ts = frame.get_value("timestamp")
+            ts = field(frame, "timestamp")
             if ts is not None:
                 row["ts"] = int(ts.timestamp())
-            for key, name in (("dist", "distance"), ("speed", "speed"), ("hr", "heart_rate"),
-                              ("cad", "cadence"), ("power", "power"), ("temp", "temperature")):
-                value = frame.get_value(name)
-                if value is not None:
-                    row[key] = float(value)
-            alt = frame.get_value("enhanced_altitude")
+            for key, names in (("dist", ("distance",)), ("speed", ("speed", "enhanced_speed")),
+                               ("hr", ("heart_rate",)), ("cad", ("cadence",)),
+                               ("power", ("power",)), ("temp", ("temperature",))):
+                for name in names:
+                    value = field(frame, name)
+                    if value is not None:
+                        row[key] = float(value)
+                        break
+            alt = field(frame, "enhanced_altitude")
             if alt is None:
-                alt = frame.get_value("altitude")
+                alt = field(frame, "altitude")
             if alt is not None:
                 row["alt"] = float(alt)
-            grade = frame.get_value("grade")
+            grade = field(frame, "grade")
             if grade is not None:  # FIT grade 单位是 %，归一化为小数
                 row["grade"] = float(grade) / 100.0
             if row:
