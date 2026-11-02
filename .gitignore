@@ -1,4 +1,5 @@
 .DS_Store
+.zcode/
 __pycache__/
 .pycache*/
 *.pyc
