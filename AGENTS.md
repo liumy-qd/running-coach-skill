@@ -101,3 +101,13 @@ fixture 由 `tests/make_fixtures.py` 生成；改 fixture 格式时同步重新�
 - 提交信息：英文祈使句单行标题（参考 `git log`，如 "Add Garmin adapter: normalize Connect data into the shared pipeline"）。
 - 文档语言：`SKILL.md` 与 `references/` 以中文为主，README 中英双语；新文档跟随所在目录的既有语言。
 - 脚本 CLI 文案中英混合已有先例（usage 英文、功能描述中文），保持各脚本内部一致即可。
+
+## 会话收尾纪律（KB 回写）
+
+在本仓库工作的 agent 会话结束前：
+
+1. 工作收口：改动全部提交，不留脏工作树；本地分支及时 push origin，避免成果只存在于单机。
+2. 过程纪要：把本次会话的提交清单 + 一两句过程，追加到
+   `~/KnowledgeBase/项目/跑步教练/工作日志-YYYY-MM-DD.md`
+   （mini/Air 经 Syncthing 同步，任一侧写均可；有拍板事项写明待拍板点）。
+3. 私有记忆：只存指向本仓库与 KB 的指针，事实以仓库与 KB 为准。
