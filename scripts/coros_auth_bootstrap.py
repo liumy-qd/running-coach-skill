@@ -15,7 +15,11 @@ from typing import Any
 
 
 AUTH_ERRORS = ("no local token cache found", "run login first", "invalid_grant", "cli session expired", "unauthorized", "401")
-URL_RE = re.compile(r"https://\S+")
+URL_RE = re.compile(r"https?://\S+")
+TOKEN_RE = re.compile(
+    r"(?i)(?:access|refresh|poll|id)[_-]?token"
+    r"(?:[\"']?\s*[:=]\s*[\"']?[^\s\",}]*|[^\s,}]*)"
+)
 
 
 def run(args: list[str], timeout: int = 90) -> subprocess.CompletedProcess[str]:
@@ -24,7 +28,7 @@ def run(args: list[str], timeout: int = 90) -> subprocess.CompletedProcess[str]:
 
 def sanitized(value: str) -> str:
     value = URL_RE.sub("[授权链接已隐藏]", value.strip())
-    return re.sub(r"(?i)(access|refresh|poll|id)[_-]?token[^\s,}]*", "[凭证已隐藏]", value)
+    return TOKEN_RE.sub("[凭证已隐藏]", value)
 
 
 def emit(status: str, message: str, code: int, json_mode: bool, extra: dict[str, Any] | None = None) -> int:
