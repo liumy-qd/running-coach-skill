@@ -32,6 +32,7 @@ jobs:
           python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json > /tmp/athlete-context.json
           python3 scripts/build_athlete_context.py --input examples/athlete-bundle.json --profile examples/athlete-profile.json > /tmp/athlete-context-profile.json
           grep -q "standing_constraints" /tmp/athlete-context-profile.json
+          grep -q "coach_style" /tmp/athlete-context-profile.json
           python3 scripts/evaluate_context.py --input /tmp/athlete-context.json --markdown
           python3 scripts/validate_prescription.py --input examples/prescription-safe.json --context /tmp/athlete-context.json
           python3 scripts/archive_snapshot.py --input examples/athlete-bundle.json --context /tmp/athlete-context.json --prescription examples/prescription-safe.json --archive-dir /tmp/rc-archive

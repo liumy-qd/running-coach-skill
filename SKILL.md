@@ -1,6 +1,6 @@
 ---
 name: running-coach
-description: 个人跑步教练 skill，支持高驰 COROS 与佳明 Garmin 手表：每日恢复门控、活动与圈速分析、训练处方校验、周复盘、比赛深度复盘、5K 到全马训练计划。Use when the user mentions COROS/高驰/佳明/Garmin、手表数据、登录/授权，or asks about daily readiness, 睡眠, HRV, 静息心率, 压力, 恢复, training load 负荷, 配速, race prediction 成绩预测, FIT/lap/segment analysis, weekly review 周复盘, 比赛复盘/深度复盘, running form 跑姿, injury/fatigue risk 伤病疲劳, weather 天气, fueling 补给, or 5K/10K/半马/全马/马拉松计划. Also trigger on 今天能不能跑、要不要跑步、能上强度吗、恢复好了吗、看下早上的状态、晨检、跑完了帮我分析下、复盘今天的跑、课表怎么调、这组课表可以吗、配速定多少、马配、间歇、长距离拉练、跑量够吗、心率偏高、HRV 低、睡得不好、膝盖疼还能跑吗、脚踝疼、破三、PB、比赛策略、跑前吃什么.
+description: 个人跑步教练 skill，支持高驰 COROS 与佳明 Garmin 手表：每日恢复门控、活动与圈速分析、训练处方校验、周复盘、比赛深度复盘、5K 到全马训练计划。Use when the user mentions COROS/高驰/佳明/Garmin、手表数据、登录/授权，or asks about daily readiness, 睡眠, HRV, 静息心率, 压力, 恢复, training load 负荷, 配速, race prediction 成绩预测, FIT/lap/segment analysis, weekly review 周复盘, 比赛复盘/深度复盘, running form 跑姿, injury/fatigue risk 伤病疲劳, weather 天气, fueling 补给, or 5K/10K/半马/全马/马拉松计划. Also trigger on 今天能不能跑、要不要跑步、能上强度吗、恢复好了吗、看下早上的状态、晨检、跑完了帮我分析下、复盘今天的跑、课表怎么调、这组课表可以吗、配速定多少、马配、间歇、长距离拉练、跑量够吗、心率偏高、HRV 低、睡得不好、膝盖疼还能跑吗、脚踝疼、破三、PB、比赛策略、跑前吃什么、换教练风格、严厉模式、鼓励模式.
 ---
 
 # Running Coach
@@ -46,7 +46,7 @@ description: 个人跑步教练 skill，支持高驰 COROS 与佳明 Garmin 手�
 - 快答（`daily-check` 等日常快问）：一句话结论 + readiness + 关键依据 + 停止规则 + 下一检查点。
 - 完整（`weekly-review`、`race-review`、`race-plan`、`data-inventory`，或用户要求详细时）：数据置信度、结论、证据窗口、观察、推断、训练处方、停止规则、降级选项、缺失数据、反馈问题和下一检查点。
 
-两档都必须遵守 yellow/red 强度上限。所有回答先用一句话重述所问问题（时间、事件、数字用原词），多子问题逐条对应；详见 `references/output-templates.md` 通用守则。结构化输出遵循 `references/v2-schemas.md`。处方校验失败时，使用校验器返回的保守方案，并说明失败原因。
+两档都必须遵守 yellow/red 强度上限。所有回答先用一句话重述所问问题（时间、事件、数字用原词），多子问题逐条对应；详见 `references/output-templates.md` 通用守则。文案语气按教练性格（`context.coach_style`）输出，目标基调、过程管理强度与跑量取档按训练偏好（`context.preferences`）执行：默认读档案，用户当次指定优先；偏好只改措辞与安全包络内的取档，数值、readiness、停止规则与安全上限不受影响，规则见 `references/coach-personas.md`。结构化输出遵循 `references/v2-schemas.md`。处方校验失败时，使用校验器返回的保守方案，并说明失败原因。
 
 ## 按需参考
 
@@ -58,11 +58,12 @@ description: 个人跑步教练 skill，支持高驰 COROS 与佳明 Garmin 手�
 - 覆盖度和来源置信度：`references/data-quality.md`
 - 7/28/56 天个人基线：`references/personal-baselines.md`
 - 本地运动员档案（目标链、锁定配速、长期约束）：`references/athlete-profile.md`
+- 教练性格与措辞规则：`references/coach-personas.md`
 - readiness、负荷和安全门控（所有数值阈值的唯一来源）：`references/metrics.md`
 - 圈速、漂移、间歇和关键活动：`references/coros-analytics.md`
 - 比赛深度复盘与 FIT 细粒度分析：`references/fit-deep-review.md`
 - 目标周期与全马：`references/training-goals.md`、`references/marathon-framework.md`
-- 伤病风险、环境与补给：`references/injury-risk.md`、`references/environment.md`、`references/environment-sources.md`、`references/fueling.md`
+- 伤病风险、环境与补给：`references/injury-risk.md`、`references/environment.md`、`references/fueling.md`
 - 计划执行复盘与输出模板：`references/plan-feedback-loop.md`、`references/output-templates.md`
 - 本地数据档案（位置、脱敏、查询）：`references/data-archive.md`
 
@@ -82,7 +83,7 @@ description: 个人跑步教练 skill，支持高驰 COROS 与佳明 Garmin 手�
 
 ## 测试
 
-`tests/test_scripts.py`、`tests/test_v2.py`、`tests/test_archive.py`、`tests/test_garmin.py` 覆盖全部脚本（含 36 个处方安全场景、FIT/圈速/佳明 fixture 回归与档案脱敏/upsert）。修改脚本或阈值后运行：
+`tests/test_scripts.py`、`tests/test_v2.py`、`tests/test_archive.py`、`tests/test_garmin.py`、`tests/test_coros_auth.py`、`tests/test_gating_mcp.py` 覆盖全部脚本（含 36 个处方安全场景、FIT/圈速/佳明 fixture 回归、认证脱敏与档案脱敏/upsert）。修改脚本或阈值后运行：
 
 ```bash
 python3 -m unittest discover -s tests

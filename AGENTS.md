@@ -26,7 +26,7 @@
 | 路径 | 作用 |
 | --- | --- |
 | `SKILL.md` | 技能入口：核心流程、最小取数、安全边界、输出契约。只写核心工作流 |
-| `references/` | 20 篇按需加载文档：阈值（`metrics.md`）、数据接入（`coros-tools.md`/`garmin-tools.md`/`coros-auth.md`）、分析规则（`coros-analytics.md`/`fit-deep-review.md`）、Schema（`v2-schemas.md`）、输出模板、本地档案、门控 MCP 等 |
+| `references/` | 20 篇按需加载文档：阈值（`metrics.md`）、数据接入（`coros-tools.md`/`garmin-tools.md`/`coros-auth.md`）、分析规则（`coros-analytics.md`/`fit-deep-review.md`）、Schema（`v2-schemas.md`）、输出模板、教练性格（`coach-personas.md`）、本地档案、门控 MCP 等 |
 | `scripts/` | 11 个 Python 脚本：管线工具 + `gating_mcp.py`（本地 stdio MCP server） |
 | `agents/openai.yaml` | harness 依赖清单：声明远程 COROS MCP（streamable_http） |
 | `examples/` | 合成数据 + 示例 prompts/outputs，用于端到端回放 |
@@ -87,7 +87,7 @@ python3 scripts/archive_snapshot.py --input examples/athlete-bundle.json --conte
 | `tests/test_coros_auth.py` | COROS 认证脚本：脱敏、错误分类、退出码、登录流程（stub subprocess，无网络） |
 | `tests/test_gating_mcp.py` | MCP 工具分发与档案工具 |
 
-fixture 由 `tests/make_fixtures.py` 生成；改 fixture 格式时同步重新生成。
+fixture 由 `tests/make_fixtures.py` 生成（`tests/fixtures/garmin_raw.json` 除外，为手工维护）；改 fixture 格式时同步重新生成。
 
 ## 双位置工作流（维护者本机）
 

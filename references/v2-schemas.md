@@ -19,6 +19,8 @@
   "goal": {},
   "athlete": {},
   "standing_constraints": [],
+  "coach_style": "",
+  "preferences": {},
   "training_history": {},
   "risk_flags": [],
   "evidence": []
@@ -27,7 +29,7 @@
 
 每个重要结论都应能回指 `evidence` 中的来源、字段、日期窗口和数值。缺失数据不能写成否定事实。
 
-`athlete` 与 `standing_constraints` 来自本地运动员档案（`references/athlete-profile.md`），档案缺失时为空，不伪造。
+`athlete`、`standing_constraints`、`coach_style` 与 `preferences` 来自本地运动员档案（`references/athlete-profile.md`），档案缺失时为空，不伪造。`coach_style` 是教练性格标签，`preferences` 是训练偏好三轴（目标取向/过程风格/训练量级），规则见 `references/coach-personas.md`：两者只影响文案表达与安全包络内的取档，不参与 readiness 评估与处方校验。
 
 ## TrainingPrescription
 

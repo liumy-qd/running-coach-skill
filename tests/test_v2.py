@@ -32,6 +32,23 @@ class V2SkillTests(unittest.TestCase):
         self.assertEqual(context["athlete"]["location"], "示例城市")
         self.assertEqual(context["standing_constraints"], ["课间停表是常态"])
 
+    def test_profile_coach_style_passthrough(self) -> None:
+        context = build_context(self.bundle, {"coach_style": "drill_sergeant"})
+        self.assertEqual(context["coach_style"], "drill_sergeant")
+
+    def test_coach_style_defaults_to_empty(self) -> None:
+        context = build_context(self.bundle)
+        self.assertEqual(context["coach_style"], "")
+
+    def test_profile_preferences_passthrough(self) -> None:
+        context = build_context(self.bundle, {"preferences": {"goal_bias": "aggressive", "volume_bias": "high"}})
+        self.assertEqual(context["preferences"]["goal_bias"], "aggressive")
+        self.assertEqual(context["preferences"]["volume_bias"], "high")
+
+    def test_preferences_default_to_empty(self) -> None:
+        context = build_context(self.bundle)
+        self.assertEqual(context["preferences"], {})
+
     def test_bundle_goal_wins_over_profile(self) -> None:
         bundle = dict(self.bundle)
         bundle["goal"] = {"season_goal": "当次目标"}
@@ -44,6 +61,8 @@ class V2SkillTests(unittest.TestCase):
         self.assertTrue(context["goal"]["race_chain"])
         self.assertTrue(context["standing_constraints"])
         self.assertIn("pace_lock_sec_km", context["goal"]["race_chain"][0])
+        self.assertEqual(context["coach_style"], "encourager")
+        self.assertEqual(context["preferences"]["volume_bias"], "high")
 
     def test_yellow_cannot_upgrade_to_quality(self) -> None:
         self.prescription["session"]["type"] = "interval"

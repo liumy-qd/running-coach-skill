@@ -26,5 +26,7 @@
     "课间停表是常态，停表段按组间恢复解读，不批评恢复不足",
     "常在田径场训练，同配速与公路差 3-5 秒/km"
   ],
+  "coach_style": "encourager",
+  "preferences": {"goal_bias": "aggressive", "process_style": "strict", "volume_bias": "high"},
   "notes": "合成示例数据，用于展示档案结构；不含任何真实个人信息。"
 }

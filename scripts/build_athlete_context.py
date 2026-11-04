@@ -175,6 +175,8 @@ def build_context(bundle: dict[str, Any], profile: dict[str, Any] | None = None)
         "goal": bundle.get("goal") or profile.get("goal") or {},
         "athlete": profile.get("athlete") or {},
         "standing_constraints": profile.get("standing_constraints") or [],
+        "coach_style": profile.get("coach_style") or "",
+        "preferences": profile.get("preferences") or {},
         "training_history": {"activities": activities, "training_load": load},
         "risk_flags": risk_flags,
         "readiness": {"level": readiness, "action": "rest_or_recovery" if readiness == "red" else "downshift" if readiness == "yellow" else "as_planned"},
