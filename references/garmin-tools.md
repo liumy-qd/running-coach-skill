@@ -29,8 +29,8 @@
 
 ## 语义差异（必须向用户说明）
 
-- **Training Readiness ≠ COROS 恢复度**：佳明的"训练准备度"混合了睡眠、负荷史、HRV 状态、压力等多因素；COROS 恢复度更接近短期恢复。门控阈值通用，但对比历史时只与佳明自己的纵向比较。
-- **HRV 口径**：佳明为睡眠 rMSSD（毫秒）。数值体系与 COROS、苹果 SDNN 不可横向比较；换表后基线必须重建（见 `personal-baselines.md` 多数据源基线）。
+- **Training Readiness ≠ COROS 恢复度**：佳明的“训练准备度”混合了睡眠、负荷史、HRV 状态、压力等多因素；与 COROS 恢复百分比不是同一量纲，按 `personal-baselines.md` 只做各自纵向比较。
+- **HRV 口径**：佳明为睡眠 rMSSD（毫秒），与 COROS、苹果 SDNN 的数值体系互不可比；混源基线与换表重建规则见 `personal-baselines.md`。
 - **比赛预测**：佳明 Connect 的预测不在 `garmin_to_bundle` 输出里；配速建议绑定阈值、近期同类训练或心率/RPE 的规则不变。
 - **训练负荷缺失时的降级**：负荷比拿不到时按 metrics.md 用频率、时长、长距离、质量课密度替代，并降低置信度。
 

@@ -73,3 +73,5 @@
 - 完成后反馈：
 ```
 
+相关文档：补给在马拉松周期中的演练安排见 `marathon-framework.md`；高温高湿下的补水优先级见 `environment.md`。
+
