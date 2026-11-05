@@ -126,6 +126,54 @@ class V2SkillTests(unittest.TestCase):
                 else:
                     self.assertTrue(result["valid"])
 
+    def test_passive_data_missing_stays_green(self) -> None:
+        bundle = json.loads(json.dumps(self.bundle))
+        for field in ("sleep", "sleep_hrv"):
+            bundle.pop(field, None)
+        context = build_context(bundle)
+        self.assertEqual(context["readiness"]["level"], "green")
+        self.assertEqual(context["coverage"]["level"], "medium")
+        self.assertIn("sleep", context["coverage"]["missing"])
+        flags = {flag["code"]: flag["severity"] for flag in context["risk_flags"]}
+        self.assertEqual(flags.get("passive_data_absent"), "low")
+        self.assertNotIn("coverage_low", flags)
+        # 绿灯且负荷正常：无恢复数据不拦质量课，处方列明缺失项即可
+        prescription = json.loads(json.dumps(self.prescription))
+        prescription["readiness"] = "green"
+        prescription["session"]["type"] = "tempo"
+        prescription["session"]["intensity"] = "threshold"
+        prescription["missing_data"] = ["睡眠/HRV 数据缺失（未佩戴手表睡觉）"]
+        prescription["evidence"] = ["负荷比 1.05，7 天 vs 28 天基线正常区间"]
+        result = validate(prescription, context)
+        self.assertTrue(result["valid"])
+
+    def test_passive_missing_with_bad_signal_downgrades(self) -> None:
+        # 缺失指标一旦出现数据即按正常信号评估，不因平时没数据而豁免
+        bundle = json.loads(json.dumps(self.bundle))
+        for field in ("sleep", "sleep_hrv"):
+            bundle.pop(field, None)
+        bundle["resting_hr"][0]["resting_hr"] = 62
+        context = build_context(bundle)
+        self.assertEqual(context["readiness"]["level"], "yellow")
+
+    def test_decision_critical_missing_downgrades(self) -> None:
+        bundle = json.loads(json.dumps(self.bundle))
+        bundle.pop("training_load")
+        context = build_context(bundle)
+        self.assertEqual(context["readiness"]["level"], "yellow")
+        self.assertIn("coverage_low", {flag["code"] for flag in context["risk_flags"]})
+
+    def test_all_passive_missing_stays_green(self) -> None:
+        bundle = json.loads(json.dumps(self.bundle))
+        for field in ("sleep", "sleep_hrv", "resting_hr", "stress", "recovery"):
+            bundle.pop(field, None)
+        context = build_context(bundle)
+        self.assertEqual(context["readiness"]["level"], "green")
+        self.assertEqual(context["coverage"]["level"], "low")
+        flags = {flag["code"]: flag["severity"] for flag in context["risk_flags"]}
+        self.assertEqual(flags.get("passive_data_absent"), "low")
+        self.assertNotIn("coverage_low", flags)
+
 
 if __name__ == "__main__":
     unittest.main()

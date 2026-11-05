@@ -29,6 +29,8 @@
 
 每个重要结论都应能回指 `evidence` 中的来源、字段、日期窗口和数值。缺失数据不能写成否定事实。
 
+`risk_flags` 的 `severity` 分三档：`high` 触发 `red`，`medium` 参与降档，`low` 仅信息提示（如被动恢复数据缺失）、不参与 readiness 门控。分级语义见 `references/metrics.md`「数据缺失分级」。
+
 `athlete`、`standing_constraints`、`coach_style` 与 `preferences` 来自本地运动员档案（`references/athlete-profile.md`），档案缺失时为空，不伪造。`coach_style` 是教练性格标签，`preferences` 是训练偏好三轴（目标取向/过程风格/训练量级），规则见 `references/coach-personas.md`：两者只影响文案表达与安全包络内的取档，不参与 readiness 评估与处方校验。
 
 ## TrainingPrescription

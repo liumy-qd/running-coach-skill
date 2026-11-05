@@ -207,6 +207,34 @@ class TestBuildAthleteContext(unittest.TestCase):
         self.assertIn("sleep_short", codes)
         self.assertEqual(context["coverage"]["level"], "high")
 
+    def _healthy_fixture(self):
+        bundle = json.loads(json.dumps(fixture("context_bundle.json")))
+        bundle["training_load"][0]["load_ratio"] = 1.05
+        # 压低最长跑距离，避开 long_run_share 信号，隔离出缺失分级路径
+        for row in bundle["activities"]:
+            row["distance_km"] = min(row.get("distance_km") or 0, 10)
+        return bundle
+
+    def test_all_passive_missing_stays_green(self):
+        build_athlete_context = load("build_athlete_context")
+        bundle = self._healthy_fixture()
+        for field in ("sleep", "sleep_hrv", "resting_hr", "stress", "recovery"):
+            bundle.pop(field, None)
+        context = build_athlete_context.build_context(bundle)
+        self.assertEqual(context["readiness"]["level"], "green")
+        self.assertEqual(context["coverage"]["level"], "low")
+        flags = {f["code"]: f["severity"] for f in context["risk_flags"]}
+        self.assertEqual(flags.get("passive_data_absent"), "low")
+        self.assertNotIn("coverage_low", flags)
+
+    def test_decision_critical_missing_downgrades(self):
+        build_athlete_context = load("build_athlete_context")
+        bundle = self._healthy_fixture()
+        bundle.pop("training_load")
+        context = build_athlete_context.build_context(bundle)
+        self.assertEqual(context["readiness"]["level"], "yellow")
+        self.assertIn("coverage_low", {f["code"] for f in context["risk_flags"]})
+
 
 class TestEvaluateContext(unittest.TestCase):
     def test_v2_red_markdown(self):
