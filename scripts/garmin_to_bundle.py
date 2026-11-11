@@ -138,19 +138,61 @@ def norm_stress(raw: dict[str, Any]) -> list[dict[str, Any]]:
     return sorted(out, key=lambda item: item["date"])
 
 
-def norm_training_load(raw: dict[str, Any]) -> list[dict[str, Any]]:
+def norm_training_load(raw: dict[str, Any], activities: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
     status = raw.get("training_status") if isinstance(raw.get("training_status"), dict) else {}
     load = status.get("currentTrainingLoad") if isinstance(status.get("currentTrainingLoad"), dict) else {}
     if not load:
         load = raw.get("training_load") if isinstance(raw.get("training_load"), dict) else {}
     day = raw.get("as_of") or str(date.today())
     ratio = as_float(pick(load, "loadRatio", "load_ratio"))
-    if ratio is None:
-        acute = as_float(pick(load, "acuteLoad", "acute", "weeklyLoad"))
-        chronic = as_float(pick(load, "chronicLoad", "chronic"))
-        if acute is not None and chronic is not None and chronic > 0:
-            ratio = round(acute / chronic, 2)
-    return [{"date": str(day)[:10], "load_ratio": ratio}] if ratio is not None else []
+    if ratio is not None:
+        return [{"date": str(day)[:10], "load_ratio": ratio}]
+    acute = as_float(pick(load, "acuteLoad", "acute", "weeklyLoad"))
+    chronic = as_float(pick(load, "chronicLoad", "chronic"))
+    if acute is not None and chronic is not None and chronic > 0:
+        return [{"date": str(day)[:10], "load_ratio": round(acute / chronic, 2)}]
+    # 手表没给负荷比（佳明国内 training-status 无 acuteLoad/chronicLoad）→ 活动级负荷推导
+    return derive_load_rows(activities or [], str(day)[:10])
+
+
+# 推导可靠性门槛：28 天窗口里至少要有这么多天的活动负荷（对齐 app 端 service/app/bundle.py 口径）
+DERIVE_MIN_LOAD_DAYS = 3
+
+
+def derive_load_rows(activities: list[dict[str, Any]], as_of: str) -> list[dict[str, Any]]:
+    """无手表负荷比时，用活动级 training_load 推导急慢性负荷比序列。
+
+    口径对齐佳明语义：acute=近 7 天日均负荷（休息日计 0），chronic=近 28 天日均负荷，
+    ratio=acute/chronic，逐日滚动出序列；活动负荷天数不足时不推导（宁缺勿错），
+    缺失场景由 build_athlete_context 按数据缺失分级处理。手表真实值优先，本函数是兜底。"""
+    daily: dict[str, float] = {}
+    for row in activities:
+        value = as_float(row.get("training_load"))
+        day = str(row.get("date") or "")
+        if value is None or not day or day > as_of:
+            continue
+        daily[day] = daily.get(day, 0.0) + value
+    if sum(1 for v in daily.values() if v > 0) < DERIVE_MIN_LOAD_DAYS:
+        return []
+    try:
+        end = date.fromisoformat(as_of)
+    except ValueError:
+        end = date.today()
+    first = min(daily)
+    out: list[dict[str, Any]] = []
+
+    def window_mean(center: date, days: int) -> float:
+        return sum(daily.get((center - timedelta(days=back)).isoformat(), 0.0) for back in range(days)) / days
+
+    for offset in range(27, -1, -1):
+        day = end - timedelta(days=offset)
+        if first > day.isoformat():
+            continue
+        chronic = window_mean(day, 28)
+        if chronic <= 0:
+            continue
+        out.append({"date": day.isoformat(), "load_ratio": round(window_mean(day, 7) / chronic, 2), "derived": True})
+    return out
 
 
 def norm_recovery(raw: dict[str, Any]) -> dict[str, Any]:
@@ -224,8 +266,8 @@ def build_bundle(raw: dict[str, Any]) -> dict[str, Any]:
     hrv = norm_hrv(raw)
     resting = norm_resting_hr(raw)
     stress = norm_stress(raw)
-    load = norm_training_load(raw)
     activities = norm_activities(raw)
+    load = norm_training_load(raw, activities)
     recovery = norm_recovery(raw)
     fitness = norm_fitness(raw)
     if sleep:

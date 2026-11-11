@@ -109,7 +109,7 @@ class V2SkillTests(unittest.TestCase):
                 elif key == "gait_pain":
                     bundle["subjective"] = {"pain_affects_gait": True}
                 elif key == "coverage_low":
-                    for field in ("sleep", "sleep_hrv", "resting_hr", "stress", "training_load"):
+                    for field in ("sleep", "sleep_hrv", "resting_hr", "stress", "training_load", "activities"):
                         bundle.pop(field, None)
                 elif key == "conflict":
                     bundle["conflicts"] = ["recovery_vs_subjective"]
@@ -156,9 +156,19 @@ class V2SkillTests(unittest.TestCase):
         context = build_context(bundle)
         self.assertEqual(context["readiness"]["level"], "yellow")
 
-    def test_decision_critical_missing_downgrades(self) -> None:
+    def test_load_ratio_missing_with_activities_stays_green(self) -> None:
+        # 负荷比缺失但活动记录完整：走替代评估路径，不单独压档
         bundle = json.loads(json.dumps(self.bundle))
         bundle.pop("training_load")
+        context = build_context(bundle)
+        self.assertEqual(context["readiness"]["level"], "green")
+        flags = {flag["code"]: flag["severity"] for flag in context["risk_flags"]}
+        self.assertEqual(flags.get("load_ratio_absent"), "low")
+        self.assertNotIn("coverage_low", flags)
+
+    def test_activities_missing_downgrades(self) -> None:
+        bundle = json.loads(json.dumps(self.bundle))
+        bundle.pop("activities")
         context = build_context(bundle)
         self.assertEqual(context["readiness"]["level"], "yellow")
         self.assertIn("coverage_low", {flag["code"] for flag in context["risk_flags"]})

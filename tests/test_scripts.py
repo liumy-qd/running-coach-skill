@@ -227,10 +227,22 @@ class TestBuildAthleteContext(unittest.TestCase):
         self.assertEqual(flags.get("passive_data_absent"), "low")
         self.assertNotIn("coverage_low", flags)
 
-    def test_decision_critical_missing_downgrades(self):
+    def test_load_ratio_missing_with_activities_stays_green(self):
         build_athlete_context = load("build_athlete_context")
         bundle = self._healthy_fixture()
-        bundle.pop("training_load")
+        # fixture 自带睡眠/HRV 等负面信号，一并按被动缺失清掉，隔离出「仅负荷比缺失」路径
+        for field in ("sleep", "sleep_hrv", "resting_hr", "stress", "recovery", "training_load"):
+            bundle.pop(field, None)
+        context = build_athlete_context.build_context(bundle)
+        self.assertEqual(context["readiness"]["level"], "green")
+        flags = {f["code"]: f["severity"] for f in context["risk_flags"]}
+        self.assertEqual(flags.get("load_ratio_absent"), "low")
+        self.assertNotIn("coverage_low", flags)
+
+    def test_activities_missing_downgrades(self):
+        build_athlete_context = load("build_athlete_context")
+        bundle = self._healthy_fixture()
+        bundle.pop("activities")
         context = build_athlete_context.build_context(bundle)
         self.assertEqual(context["readiness"]["level"], "yellow")
         self.assertIn("coverage_low", {f["code"] for f in context["risk_flags"]})

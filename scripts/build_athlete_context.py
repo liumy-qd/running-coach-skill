@@ -104,8 +104,9 @@ def coverage(bundle: dict[str, Any], health: list[dict[str, Any]], activities: l
 
 
 # 数据缺失分级（语义见 references/metrics.md「数据缺失分级」）：
-# 决策关键数据缺失 → readiness 保守降档；被动恢复指标缺失 → 仅信息提示，不压档。
-DECISION_CRITICAL = ("training_load", "activities")
+# 活动记录缺失 → readiness 保守降档；负荷比缺失但活动记录在 → 走替代评估，仅信息提示；
+# 被动恢复指标缺失 → 仅信息提示，不压档。
+DECISION_CRITICAL = ("activities",)
 PASSIVE_METRICS = ("sleep", "sleep_hrv", "resting_hr", "stress", "recovery")
 
 
@@ -133,7 +134,9 @@ def build_context(bundle: dict[str, Any], profile: dict[str, Any] | None = None)
         risk_flags.append({"code": "recovery_low", "severity": "medium", "detail": "恢复百分比偏低。"})
     decision_missing = [key for key in DECISION_CRITICAL if key in coverage_data["missing"]]
     if decision_missing:
-        risk_flags.append({"code": "coverage_low", "severity": "medium", "detail": "决策关键数据缺失（{}），无法核实负荷安全，按保守处理。".format("、".join(decision_missing))})
+        risk_flags.append({"code": "coverage_low", "severity": "medium", "detail": "决策关键数据缺失（{}），无法核实活动与负荷趋势，按保守处理。".format("、".join(decision_missing))})
+    elif "training_load" in coverage_data["missing"]:
+        risk_flags.append({"code": "load_ratio_absent", "severity": "low", "detail": "负荷比缺失但活动记录完整，负荷安全改由活动趋势替代评估（近 7/28 天频率、总量与质量课）。"})
     passive_missing = [key for key in PASSIVE_METRICS if key in coverage_data["missing"]]
     if passive_missing:
         risk_flags.append({"code": "passive_data_absent", "severity": "low", "detail": "缺少被动恢复数据（{}），多为未佩戴或未同步所致，不单独作为降档依据。".format("、".join(passive_missing))})

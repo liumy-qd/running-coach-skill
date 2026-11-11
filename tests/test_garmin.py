@@ -58,6 +58,29 @@ class TestNormalize(unittest.TestCase):
 
     def test_load_ratio_from_acute_chronic(self):
         self.assertAlmostEqual(self.bundle["training_load"][0]["load_ratio"], 1.14, places=2)
+        self.assertNotIn("derived", self.bundle["training_load"][0])  # 手表真实值，无推导标记
+
+    def test_load_ratio_derived_from_activities(self):
+        # 佳明国内形态：training-status 无 acuteLoad → 活动级负荷推导（≥3 天负荷才可信）
+        raw = json.loads(json.dumps(self.raw))
+        raw["training_status"].pop("currentTrainingLoad")
+        raw["activities"] = [
+            {"activityId": 2000 + i, "startTimeLocal": "2026-10-{:02d}T18:00:00.0".format(12 - i),
+             "distance": 10000, "duration": 3000, "activityTrainingLoad": 150 + i * 5}
+            for i in range(5)
+        ]
+        rows = garmin.build_bundle(raw)["training_load"]
+        self.assertTrue(rows)
+        self.assertTrue(all(row.get("derived") for row in rows))
+        self.assertEqual(rows[-1]["date"], "2026-10-13")
+        # 近 7 天日均 800/7 vs 近 28 天日均 800/28 → ratio 4.0（急升场景仅验证口径）
+        self.assertAlmostEqual(rows[-1]["load_ratio"], 4.0, places=2)
+
+    def test_load_ratio_not_derived_from_sparse_activities(self):
+        # fixture 只有 1 次带负荷的活动，不足 3 天 → 宁缺勿错，不产出推导行
+        raw = json.loads(json.dumps(self.raw))
+        raw["training_status"].pop("currentTrainingLoad")
+        self.assertNotIn("training_load", garmin.build_bundle(raw))
 
     def test_recovery_from_training_readiness(self):
         self.assertEqual(self.bundle["recovery"]["recovery_percent"], 76)
